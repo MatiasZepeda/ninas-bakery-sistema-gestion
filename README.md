@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema de Gestión Empresarial - Nina's Bakery
 
-## Getting Started
+Sistema web integral para la administración de un negocio. Permite gestionar gastos, ventas, productos, y generar reportes financieros.
 
-First, run the development server:
+## Características
+
+- **Dashboard Inteligente**: KPIs en tiempo real, gráficos de tendencia, transacciones recientes
+- **Control de Gastos**: Registro categorizado, filtros, múltiples métodos de pago
+- **Gestión de Ventas**: Registro con múltiples productos, cálculo automático de ganancia
+- **Catálogo de Productos**: Precios de costo y venta, cálculo de márgenes
+- **Reportes Financieros**: Estado de Resultados (P&L), Flujo de Caja, exportación a PDF
+- **Autenticación Segura**: Login/Registro con Supabase Auth
+
+## Stack Tecnológico
+
+- **Frontend**: Next.js 16+ (App Router), TypeScript, Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Gráficos**: Recharts
+- **PDF Export**: jsPDF
+
+## Instalación
+
+### 1. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 2. Configurar Supabase
+
+1. Crear una cuenta en [Supabase](https://supabase.com)
+2. Crear un nuevo proyecto
+3. Ir a **SQL Editor** y ejecutar el contenido de `supabase/schema.sql`
+4. Ir a **Settings > API** y copiar:
+   - Project URL
+   - anon/public key
+
+### 3. Configurar variables de entorno
+
+Editar el archivo `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+```
+
+### 4. Ejecutar el proyecto
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estructura del Proyecto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+sistema-gestion/
+├── src/
+│   ├── app/                    # Páginas (App Router)
+│   │   ├── (auth)/            # Login, Register
+│   │   ├── (dashboard)/       # Dashboard, Gastos, Ventas, etc.
+│   │   └── page.tsx           # Landing page
+│   ├── components/
+│   │   ├── ui/                # shadcn/ui components
+│   │   ├── layout/            # Sidebar, Header, Navigation
+│   │   ├── dashboard/         # Componentes del dashboard
+│   │   ├── expenses/          # Módulo de gastos
+│   │   ├── sales/             # Módulo de ventas
+│   │   ├── products/          # Módulo de productos
+│   │   └── reports/           # Módulo de reportes
+│   ├── lib/
+│   │   ├── supabase/          # Clientes Supabase
+│   │   └── utils.ts           # Utilidades
+│   └── types/
+│       └── database.ts        # Tipos TypeScript
+├── supabase/
+│   └── schema.sql             # Esquema de base de datos
+└── .env.local                 # Variables de entorno
+```
 
-## Learn More
+## Uso
 
-To learn more about Next.js, take a look at the following resources:
+### Registro de Usuario
+1. Ir a `/register`
+2. Completar el formulario con nombre del negocio, email y contraseña
+3. Las categorías predeterminadas se crean automáticamente
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Gestión de Productos
+1. Ir a **Productos** en el menú
+2. Agregar productos con precio de costo y precio de venta
+3. El sistema calcula automáticamente el margen de ganancia
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Registro de Gastos
+1. Ir a **Gastos** en el menú
+2. Registrar gastos con categoría, proveedor, monto y fecha
+3. Filtrar por categoría o buscar por texto
 
-## Deploy on Vercel
+### Registro de Ventas
+1. Ir a **Ventas** en el menú
+2. Seleccionar productos del catálogo
+3. El sistema calcula automáticamente el total, costo y ganancia
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Reportes
+1. Ir a **Reportes** en el menú
+2. Ver Estado de Resultados, Flujo de Caja, Rendimiento de Productos
+3. Exportar a PDF para análisis offline
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy en Vercel
+
+1. Conectar el repositorio a [Vercel](https://vercel.com)
+2. Configurar las variables de entorno en Vercel
+3. Deploy automático con cada push
+
+## Licencia
+
+MIT
