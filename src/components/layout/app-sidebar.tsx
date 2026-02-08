@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Receipt,
@@ -10,7 +10,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Store,
+  Cookie,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -24,8 +24,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 const menuItems = [
@@ -67,10 +65,9 @@ const settingsItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClient();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await fetch('/api/auth', { method: 'DELETE' });
     toast.success('Sesión cerrada');
     router.push('/login');
     router.refresh();
@@ -81,7 +78,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b px-6 py-4">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-rose-100 flex items-center justify-center">
-            <Store className="h-5 w-5 text-rose-600" />
+            <Cookie className="h-5 w-5 text-rose-600" />
           </div>
           <span className="font-semibold text-lg">Nina&apos;s Bakery</span>
         </Link>
