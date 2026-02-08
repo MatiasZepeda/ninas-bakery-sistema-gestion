@@ -13,7 +13,7 @@ CREATE TABLE public.profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
     email TEXT NOT NULL,
     business_name TEXT,
-    currency TEXT NOT NULL DEFAULT 'CLP',
+    currency TEXT NOT NULL DEFAULT 'USD',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -301,21 +301,21 @@ RETURNS TRIGGER AS $$
 BEGIN
     -- Default expense categories
     INSERT INTO public.categories (user_id, name, type, color, is_system) VALUES
-        (NEW.id, 'Insumos', 'expense', '#FF6B6B', TRUE),
-        (NEW.id, 'Arriendo', 'expense', '#4ECDC4', TRUE),
-        (NEW.id, 'Sueldos', 'expense', '#45B7D1', TRUE),
-        (NEW.id, 'Servicios', 'expense', '#96CEB4', TRUE),
+        (NEW.id, 'Ingredients', 'expense', '#FF6B6B', TRUE),
+        (NEW.id, 'Rent', 'expense', '#4ECDC4', TRUE),
+        (NEW.id, 'Salaries', 'expense', '#45B7D1', TRUE),
+        (NEW.id, 'Utilities', 'expense', '#96CEB4', TRUE),
         (NEW.id, 'Marketing', 'expense', '#FFEAA7', TRUE),
-        (NEW.id, 'Transporte', 'expense', '#DDA0DD', TRUE),
-        (NEW.id, 'Otros Gastos', 'expense', '#B0B0B0', TRUE);
+        (NEW.id, 'Transportation', 'expense', '#DDA0DD', TRUE),
+        (NEW.id, 'Other Expenses', 'expense', '#B0B0B0', TRUE);
 
     -- Default product categories
     INSERT INTO public.categories (user_id, name, type, color, is_system) VALUES
-        (NEW.id, 'Pasteles', 'product', '#FFB6C1', TRUE),
-        (NEW.id, 'Pan', 'product', '#DEB887', TRUE),
-        (NEW.id, 'Galletas', 'product', '#F0E68C', TRUE),
-        (NEW.id, 'Bebidas', 'product', '#87CEEB', TRUE),
-        (NEW.id, 'Otros Productos', 'product', '#D3D3D3', TRUE);
+        (NEW.id, 'Alfajores', 'product', '#FFB6C1', TRUE),
+        (NEW.id, 'Cookies', 'product', '#DEB887', TRUE),
+        (NEW.id, 'Cakes', 'product', '#F0E68C', TRUE),
+        (NEW.id, 'Drinks', 'product', '#87CEEB', TRUE),
+        (NEW.id, 'Other Products', 'product', '#D3D3D3', TRUE);
 
     RETURN NEW;
 END;

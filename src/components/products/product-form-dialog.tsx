@@ -176,7 +176,7 @@ export function ProductFormDialog({
                   id="costPrice"
                   type="number"
                   min="0"
-                  step="1"
+                  step="0.01"
                   value={costPrice}
                   onChange={(e) => setCostPrice(e.target.value)}
                   placeholder="0"
@@ -190,7 +190,7 @@ export function ProductFormDialog({
                   id="salePrice"
                   type="number"
                   min="0"
-                  step="1"
+                  step="0.01"
                   value={salePrice}
                   onChange={(e) => setSalePrice(e.target.value)}
                   placeholder="0"

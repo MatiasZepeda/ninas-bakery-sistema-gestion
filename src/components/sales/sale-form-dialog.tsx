@@ -55,7 +55,7 @@ const paymentMethods = [
   { value: 'transfer', label: 'Transfer' },
 ];
 
-const channels = ['Store', 'Web', 'Delivery', 'WhatsApp', 'Instagram'];
+const channels = ['Store', 'Web', 'Delivery', 'WhatsApp', 'Instagram', 'Word of Mouth'];
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
