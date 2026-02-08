@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Receipt,
@@ -9,13 +9,11 @@ import {
   Package,
   BarChart3,
   Settings,
-  LogOut,
   Cookie,
 } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -24,54 +22,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { toast } from 'sonner';
 
 const menuItems = [
-  {
-    title: 'Dashboard',
-    url: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    title: 'Gastos',
-    url: '/dashboard/gastos',
-    icon: Receipt,
-  },
-  {
-    title: 'Ventas',
-    url: '/dashboard/ventas',
-    icon: ShoppingCart,
-  },
-  {
-    title: 'Productos',
-    url: '/dashboard/productos',
-    icon: Package,
-  },
-  {
-    title: 'Reportes',
-    url: '/dashboard/reportes',
-    icon: BarChart3,
-  },
-];
-
-const settingsItems = [
-  {
-    title: 'Configuración',
-    url: '/dashboard/configuracion',
-    icon: Settings,
-  },
+  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Gastos', url: '/dashboard/gastos', icon: Receipt },
+  { title: 'Ventas', url: '/dashboard/ventas', icon: ShoppingCart },
+  { title: 'Productos', url: '/dashboard/productos', icon: Package },
+  { title: 'Reportes', url: '/dashboard/reportes', icon: BarChart3 },
+  { title: 'Configuración', url: '/dashboard/configuracion', icon: Settings },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await fetch('/api/auth', { method: 'DELETE' });
-    toast.success('Sesión cerrada');
-    router.push('/login');
-    router.refresh();
-  };
 
   return (
     <Sidebar>
@@ -85,7 +47,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menú Principal</SidebarGroupLabel>
+          <SidebarGroupLabel>Menú</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -105,38 +67,7 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Sistema</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t p-4">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout} tooltip="Cerrar Sesión">
-              <LogOut />
-              <span>Cerrar Sesión</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
     </Sidebar>
   );
 }
