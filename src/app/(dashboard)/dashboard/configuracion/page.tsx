@@ -50,11 +50,22 @@ export default function ConfiguracionPage() {
 
     setEmail(user.email || '');
 
-    const { data: profile } = await supabase
+    // Try to get profile, create if doesn't exist
+    let { data: profile } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
+
+    if (!profile) {
+      // Create profile if it doesn't exist
+      const { data: newProfile } = await supabase
+        .from('profiles')
+        .insert({ id: user.id, email: user.email || '' })
+        .select()
+        .single();
+      profile = newProfile;
+    }
 
     if (profile) {
       setBusinessName(profile.business_name || '');
