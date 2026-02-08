@@ -1,13 +1,17 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-// PIN por defecto: "nina" - cambiar en variable de entorno NINA_PIN
-const VALID_PIN = process.env.NINA_PIN || 'nina';
-
 export async function POST(request: Request) {
   const { pin } = await request.json();
 
-  if (pin === VALID_PIN) {
+  // PIN por defecto: "nina" - cambiar en variable de entorno NINA_PIN
+  const validPin = process.env.NINA_PIN && process.env.NINA_PIN.length > 0
+    ? process.env.NINA_PIN
+    : 'nina';
+
+  console.log('PIN attempt:', pin, 'Valid PIN:', validPin); // Debug
+
+  if (pin === validPin) {
     const cookieStore = await cookies();
     cookieStore.set('nina-auth', 'true', {
       httpOnly: true,
