@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -9,7 +10,6 @@ import {
   Package,
   BarChart3,
   Settings,
-  Cookie,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -37,17 +37,24 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b px-6 py-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-rose-100 flex items-center justify-center">
-            <Cookie className="h-5 w-5 text-rose-600" />
+      <SidebarHeader className="border-b border-nina-brown/20 px-4 py-4">
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <Image
+            src="/images/logo-circle.jpeg"
+            alt="Nina's Bakery"
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
+          <div className="flex flex-col">
+            <span className="font-semibold text-nina-brown">Nina&apos;s Bakery</span>
+            <span className="text-xs text-nina-brown/60">Sweet like home</span>
           </div>
-          <span className="font-semibold text-lg">Nina&apos;s Bakery</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menú</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-nina-brown/70">Menú</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -56,6 +63,7 @@ export function AppSidebar() {
                     asChild
                     isActive={pathname === item.url}
                     tooltip={item.title}
+                    className="data-[active=true]:bg-nina-cream data-[active=true]:text-nina-brown"
                   >
                     <Link href={item.url}>
                       <item.icon />

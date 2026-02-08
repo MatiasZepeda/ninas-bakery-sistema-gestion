@@ -6,8 +6,11 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Sistema de Gestión - Nina's Bakery",
-  description: "Sistema de gestión empresarial integral para administración de gastos, ventas y contabilidad",
+  title: "Nina's Bakery - Gestión",
+  description: "Sistema de gestión para Nina's Bakery - Sweet like home",
+  icons: {
+    icon: "/images/logo-circle.jpeg",
+  },
 };
 
 export default function RootLayout({
