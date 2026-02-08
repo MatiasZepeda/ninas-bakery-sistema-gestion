@@ -40,14 +40,14 @@ interface ProfitLossReportProps {
 }
 
 const chartConfig = {
-  revenue: { label: 'Ingresos', color: 'hsl(var(--chart-1))' },
-  netProfit: { label: 'Ganancia Neta', color: 'hsl(var(--chart-2))' },
+  revenue: { label: 'Revenue', color: 'hsl(var(--chart-1))' },
+  netProfit: { label: 'Net Profit', color: 'hsl(var(--chart-2))' },
 } satisfies ChartConfig;
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
   }).format(value);
 }
@@ -74,29 +74,29 @@ export function ProfitLossReport({ data, expenseBreakdown }: ProfitLossReportPro
         const doc = new jsPDF();
 
         doc.setFontSize(18);
-        doc.text('Estado de Resultados', 14, 22);
+        doc.text('Profit & Loss Statement', 14, 22);
         doc.setFontSize(11);
-        doc.text(`Generado: ${new Date().toLocaleDateString('es-CL')}`, 14, 30);
+        doc.text(`Generated: ${new Date().toLocaleDateString('en-US')}`, 14, 30);
 
         const tableData = [
-          ['Ingresos por Ventas', formatCurrency(totals.revenue)],
-          ['(-) Costo de Ventas', formatCurrency(totals.costOfGoods)],
-          ['= Utilidad Bruta', formatCurrency(totals.grossProfit)],
-          ['(-) Gastos Operacionales', formatCurrency(totals.operatingExpenses)],
-          ['= Utilidad Neta', formatCurrency(totals.netProfit)],
+          ['Sales Revenue', formatCurrency(totals.revenue)],
+          ['(-) Cost of Goods Sold', formatCurrency(totals.costOfGoods)],
+          ['= Gross Profit', formatCurrency(totals.grossProfit)],
+          ['(-) Operating Expenses', formatCurrency(totals.operatingExpenses)],
+          ['= Net Profit', formatCurrency(totals.netProfit)],
           ['', ''],
-          ['Margen Bruto', `${grossMargin.toFixed(1)}%`],
-          ['Margen Neto', `${netMargin.toFixed(1)}%`],
+          ['Gross Margin', `${grossMargin.toFixed(1)}%`],
+          ['Net Margin', `${netMargin.toFixed(1)}%`],
         ];
 
         (autoTable as { default: typeof autoTable.default }).default(doc, {
           startY: 40,
-          head: [['Concepto', 'Monto']],
+          head: [['Item', 'Amount']],
           body: tableData,
           theme: 'striped',
         });
 
-        doc.save('estado-resultados.pdf');
+        doc.save('profit-loss-statement.pdf');
       });
     });
   };
@@ -106,7 +106,7 @@ export function ProfitLossReport({ data, expenseBreakdown }: ProfitLossReportPro
       <div className="flex justify-end">
         <Button variant="outline" size="sm" onClick={exportToPDF}>
           <Download className="mr-2 h-4 w-4" />
-          Exportar PDF
+          Export PDF
         </Button>
       </div>
 
@@ -118,7 +118,7 @@ export function ProfitLossReport({ data, expenseBreakdown }: ProfitLossReportPro
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) =>
-              new Intl.NumberFormat('es-CL', {
+              new Intl.NumberFormat('en-US', {
                 notation: 'compact',
               }).format(value)
             }
@@ -151,19 +151,19 @@ export function ProfitLossReport({ data, expenseBreakdown }: ProfitLossReportPro
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Concepto</TableHead>
-              <TableHead className="text-right">Total 12 Meses</TableHead>
-              <TableHead className="text-right">% de Ingresos</TableHead>
+              <TableHead>Item</TableHead>
+              <TableHead className="text-right">12-Month Total</TableHead>
+              <TableHead className="text-right">% of Revenue</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell className="font-medium">Ingresos por Ventas</TableCell>
+              <TableCell className="font-medium">Sales Revenue</TableCell>
               <TableCell className="text-right">{formatCurrency(totals.revenue)}</TableCell>
               <TableCell className="text-right">100%</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="text-muted-foreground pl-6">(-) Costo de Ventas</TableCell>
+              <TableCell className="text-muted-foreground pl-6">(-) Cost of Goods Sold</TableCell>
               <TableCell className="text-right text-red-600">
                 {formatCurrency(totals.costOfGoods)}
               </TableCell>
@@ -172,14 +172,14 @@ export function ProfitLossReport({ data, expenseBreakdown }: ProfitLossReportPro
               </TableCell>
             </TableRow>
             <TableRow className="bg-muted/50">
-              <TableCell className="font-medium">= Utilidad Bruta</TableCell>
+              <TableCell className="font-medium">= Gross Profit</TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(totals.grossProfit)}
               </TableCell>
               <TableCell className="text-right font-medium">{grossMargin.toFixed(1)}%</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="text-muted-foreground pl-6">(-) Gastos Operacionales</TableCell>
+              <TableCell className="text-muted-foreground pl-6">(-) Operating Expenses</TableCell>
               <TableCell className="text-right text-red-600">
                 {formatCurrency(totals.operatingExpenses)}
               </TableCell>
@@ -190,7 +190,7 @@ export function ProfitLossReport({ data, expenseBreakdown }: ProfitLossReportPro
               </TableCell>
             </TableRow>
             <TableRow className="bg-muted">
-              <TableCell className="font-bold">= Utilidad Neta</TableCell>
+              <TableCell className="font-bold">= Net Profit</TableCell>
               <TableCell
                 className={`text-right font-bold ${totals.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}
               >
@@ -204,7 +204,7 @@ export function ProfitLossReport({ data, expenseBreakdown }: ProfitLossReportPro
 
       {expenseBreakdown.length > 0 && (
         <div>
-          <h4 className="font-medium mb-3">Desglose de Gastos (Mes Actual)</h4>
+          <h4 className="font-medium mb-3">Expense Breakdown (Current Month)</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {expenseBreakdown.map((expense) => (
               <div

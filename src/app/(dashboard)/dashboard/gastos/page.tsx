@@ -62,15 +62,15 @@ export default async function GastosPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Gastos</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Expenses</h2>
           <p className="text-muted-foreground">
-            Registra y gestiona los gastos de tu negocio
+            Track and manage your business expenses
           </p>
         </div>
         <ExpenseFormDialog categories={categories}>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Nuevo Gasto
+            New Expense
           </Button>
         </ExpenseFormDialog>
       </div>

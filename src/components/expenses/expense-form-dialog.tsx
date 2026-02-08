@@ -33,7 +33,6 @@ import {
 import { toast } from 'sonner';
 import { Loader2, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface ExpenseFormDialogProps {
@@ -45,10 +44,10 @@ interface ExpenseFormDialogProps {
 }
 
 const paymentMethods = [
-  { value: 'cash', label: 'Efectivo' },
-  { value: 'debit', label: 'Débito' },
-  { value: 'credit', label: 'Crédito' },
-  { value: 'transfer', label: 'Transferencia' },
+  { value: 'cash', label: 'Cash' },
+  { value: 'debit', label: 'Debit' },
+  { value: 'credit', label: 'Credit' },
+  { value: 'transfer', label: 'Transfer' },
 ];
 
 export function ExpenseFormDialog({
@@ -102,7 +101,7 @@ export function ExpenseFormDialog({
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No autorizado');
+      if (!user) throw new Error('Unauthorized');
 
       const expenseData = {
         amount: parseFloat(amount) || 0,
@@ -121,21 +120,21 @@ export function ExpenseFormDialog({
           .eq('id', expense.id);
 
         if (error) throw error;
-        toast.success('Gasto actualizado');
+        toast.success('Expense updated');
       } else {
         const { error } = await supabase
           .from('expenses')
           .insert(expenseData);
 
         if (error) throw error;
-        toast.success('Gasto registrado');
+        toast.success('Expense recorded');
       }
 
       setIsOpen(false);
       resetForm();
       router.refresh();
     } catch (error) {
-      toast.error(isEditing ? 'Error al actualizar' : 'Error al registrar');
+      toast.error(isEditing ? 'Error updating' : 'Error recording');
       console.error(error);
     } finally {
       setLoading(false);
@@ -148,19 +147,19 @@ export function ExpenseFormDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Editar Gasto' : 'Nuevo Gasto'}
+            {isEditing ? 'Edit Expense' : 'New Expense'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? 'Modifica los datos del gasto'
-              : 'Registra un nuevo gasto de tu negocio'}
+              ? 'Modify expense details'
+              : 'Record a new business expense'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="amount">Monto *</Label>
+                <Label htmlFor="amount">Amount *</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -174,7 +173,7 @@ export function ExpenseFormDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Fecha *</Label>
+                <Label>Date *</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -186,7 +185,7 @@ export function ExpenseFormDialog({
                       disabled={loading}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, 'dd/MM/yyyy') : 'Seleccionar'}
+                      {date ? format(date, 'MM/dd/yyyy') : 'Select'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -194,7 +193,6 @@ export function ExpenseFormDialog({
                       mode="single"
                       selected={date}
                       onSelect={(d) => d && setDate(d)}
-                      locale={es}
                       initialFocus
                     />
                   </PopoverContent>
@@ -203,10 +201,10 @@ export function ExpenseFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Categoría</Label>
+              <Label htmlFor="category">Category</Label>
               <Select value={categoryId} onValueChange={setCategoryId} disabled={loading}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar categoría" />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
@@ -219,25 +217,25 @@ export function ExpenseFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="supplier">Proveedor</Label>
+              <Label htmlFor="supplier">Supplier</Label>
               <Input
                 id="supplier"
                 value={supplier}
                 onChange={(e) => setSupplier(e.target.value)}
-                placeholder="Nombre del proveedor"
+                placeholder="Supplier name"
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="paymentMethod">Método de Pago</Label>
+              <Label htmlFor="paymentMethod">Payment Method</Label>
               <Select
                 value={paymentMethod}
                 onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
                 disabled={loading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar método" />
+                  <SelectValue placeholder="Select method" />
                 </SelectTrigger>
                 <SelectContent>
                   {paymentMethods.map((method) => (
@@ -250,12 +248,12 @@ export function ExpenseFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descripción</Label>
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Detalles del gasto..."
+                placeholder="Expense details..."
                 rows={3}
                 disabled={loading}
               />
@@ -264,11 +262,11 @@ export function ExpenseFormDialog({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={loading}>
-              Cancelar
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditing ? 'Guardar Cambios' : 'Registrar Gasto'}
+              {isEditing ? 'Save Changes' : 'Record Expense'}
             </Button>
           </DialogFooter>
         </form>

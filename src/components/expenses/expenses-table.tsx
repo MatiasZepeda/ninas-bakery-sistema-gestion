@@ -30,7 +30,6 @@ import { MoreHorizontal, Pencil, Trash2, Search, Calendar } from 'lucide-react';
 import { ExpenseFormDialog } from './expense-form-dialog';
 import { DeleteExpenseDialog } from './delete-expense-dialog';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 interface ExpensesTableProps {
   expenses: (Expense & { category: Category | null })[];
@@ -38,16 +37,16 @@ interface ExpensesTableProps {
 }
 
 const paymentMethodLabels: Record<string, string> = {
-  cash: 'Efectivo',
-  debit: 'Débito',
-  credit: 'Crédito',
-  transfer: 'Transferencia',
+  cash: 'Cash',
+  debit: 'Debit',
+  credit: 'Credit',
+  transfer: 'Transfer',
 };
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
   }).format(value);
 }
@@ -77,7 +76,7 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por descripción o proveedor..."
+            placeholder="Search by description or supplier..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -88,7 +87,7 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
             <SelectValue placeholder="Categoría" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas las categorías</SelectItem>
+            <SelectItem value="all">All categories</SelectItem>
             {categories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 {category.name}
@@ -102,12 +101,12 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead>Proveedor</TableHead>
-              <TableHead>Categoría</TableHead>
-              <TableHead>Método</TableHead>
-              <TableHead className="text-right">Monto</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Supplier</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Method</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -116,8 +115,8 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   {search || categoryFilter !== 'all'
-                    ? 'No se encontraron gastos'
-                    : 'No hay gastos registrados'}
+                    ? 'No expenses found'
+                    : 'No expenses registered'}
                 </TableCell>
               </TableRow>
             ) : (
@@ -126,7 +125,7 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      {format(new Date(expense.date), 'dd MMM yyyy', { locale: es })}
+                      {format(new Date(expense.date), 'MMM dd, yyyy')}
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">
@@ -165,14 +164,14 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setEditingExpense(expense)}>
                           <Pencil className="mr-2 h-4 w-4" />
-                          Editar
+                          Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setDeletingExpense(expense)}
                           className="text-red-600"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

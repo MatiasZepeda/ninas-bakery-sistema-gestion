@@ -6,11 +6,11 @@ import { usePathname } from 'next/navigation';
 
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
-  '/dashboard/gastos': 'Gastos',
-  '/dashboard/ventas': 'Ventas',
-  '/dashboard/productos': 'Productos',
-  '/dashboard/reportes': 'Reportes',
-  '/dashboard/configuracion': 'Configuración',
+  '/dashboard/gastos': 'Expenses',
+  '/dashboard/ventas': 'Sales',
+  '/dashboard/productos': 'Products',
+  '/dashboard/reportes': 'Reports',
+  '/dashboard/configuracion': 'Settings',
 };
 
 export function Header() {

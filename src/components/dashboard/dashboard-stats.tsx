@@ -9,9 +9,9 @@ interface DashboardStatsProps {
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -25,7 +25,7 @@ function formatPercent(value: number): string {
 export function DashboardStats({ stats }: DashboardStatsProps) {
   const cards = [
     {
-      title: 'Ingresos del Mes',
+      title: 'Monthly Revenue',
       value: formatCurrency(stats.totalRevenue),
       change: stats.revenueChange,
       icon: DollarSign,
@@ -33,7 +33,7 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
       iconColor: 'text-green-600',
     },
     {
-      title: 'Gastos del Mes',
+      title: 'Monthly Expenses',
       value: formatCurrency(stats.totalExpenses),
       change: stats.expensesChange,
       icon: TrendingDown,
@@ -42,7 +42,7 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
       invertChange: true,
     },
     {
-      title: 'Ganancia Neta',
+      title: 'Net Profit',
       value: formatCurrency(stats.profit),
       change: stats.profitChange,
       icon: TrendingUp,
@@ -50,7 +50,7 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
       iconColor: 'text-blue-600',
     },
     {
-      title: 'Margen de Ganancia',
+      title: 'Profit Margin',
       value: `${stats.profitMargin.toFixed(1)}%`,
       icon: Percent,
       iconBg: 'bg-purple-100',
@@ -78,7 +78,7 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
                   ? 'text-green-600'
                   : 'text-red-600'
               }`}>
-                {formatPercent(card.change)} vs mes anterior
+                {formatPercent(card.change)} vs last month
               </p>
             )}
           </CardContent>

@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 interface Transaction {
   id: string;
@@ -22,9 +21,9 @@ interface RecentTransactionsProps {
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -35,10 +34,10 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Transacciones Recientes</CardTitle>
+          <CardTitle>Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-[200px]">
-          <p className="text-muted-foreground">No hay transacciones recientes</p>
+          <p className="text-muted-foreground">No recent transactions</p>
         </CardContent>
       </Card>
     );
@@ -47,7 +46,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Transacciones Recientes</CardTitle>
+        <CardTitle>Recent Transactions</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -55,8 +54,8 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
             const isSale = transaction.type === 'sale';
             const amount = isSale ? transaction.total_amount : transaction.amount;
             const description = isSale
-              ? transaction.customer_name || 'Venta'
-              : transaction.supplier || transaction.category?.name || 'Gasto';
+              ? transaction.customer_name || 'Sale'
+              : transaction.supplier || transaction.category?.name || 'Expense';
 
             return (
               <div
@@ -80,7 +79,6 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                     <p className="text-sm text-muted-foreground">
                       {formatDistanceToNow(new Date(transaction.created_at), {
                         addSuffix: true,
-                        locale: es,
                       })}
                     </p>
                   </div>
@@ -90,7 +88,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                     {isSale ? '+' : '-'}{formatCurrency(amount || 0)}
                   </p>
                   <Badge variant={isSale ? 'default' : 'secondary'} className="text-xs">
-                    {isSale ? 'Venta' : 'Gasto'}
+                    {isSale ? 'Sale' : 'Expense'}
                   </Badge>
                 </div>
               </div>

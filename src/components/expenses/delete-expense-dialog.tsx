@@ -24,9 +24,9 @@ interface DeleteExpenseDialogProps {
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
   }).format(value);
 }
@@ -51,11 +51,11 @@ export function DeleteExpenseDialog({
 
       if (error) throw error;
 
-      toast.success('Gasto eliminado');
+      toast.success('Expense deleted');
       onOpenChange(false);
       router.refresh();
     } catch (error) {
-      toast.error('Error al eliminar el gasto');
+      toast.error('Error deleting expense');
       console.error(error);
     } finally {
       setLoading(false);
@@ -66,21 +66,21 @@ export function DeleteExpenseDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar gasto?</AlertDialogTitle>
+          <AlertDialogTitle>Delete expense?</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción eliminará permanentemente el gasto de {formatCurrency(expense.amount)}.
-            Esta acción no se puede deshacer.
+            This action will permanently delete the expense of {formatCurrency(expense.amount)}.
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={loading}
             className="bg-red-600 hover:bg-red-700"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Eliminar
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

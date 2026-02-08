@@ -24,9 +24,9 @@ interface DeleteSaleDialogProps {
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
   }).format(value);
 }
@@ -51,11 +51,11 @@ export function DeleteSaleDialog({
 
       if (error) throw error;
 
-      toast.success('Venta eliminada');
+      toast.success('Sale deleted');
       onOpenChange(false);
       router.refresh();
     } catch (error) {
-      toast.error('Error al eliminar la venta');
+      toast.error('Error deleting sale');
       console.error(error);
     } finally {
       setLoading(false);
@@ -66,21 +66,21 @@ export function DeleteSaleDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar venta?</AlertDialogTitle>
+          <AlertDialogTitle>Delete sale?</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción eliminará permanentemente la venta de {formatCurrency(sale.total_amount)}.
-            Esta acción no se puede deshacer.
+            This action will permanently delete the sale of {formatCurrency(sale.total_amount)}.
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={loading}
             className="bg-red-600 hover:bg-red-700"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Eliminar
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

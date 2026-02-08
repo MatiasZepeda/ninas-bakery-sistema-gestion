@@ -9,9 +9,9 @@ interface TopProductsProps {
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -22,10 +22,10 @@ export function TopProducts({ products }: TopProductsProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Productos Más Vendidos</CardTitle>
+          <CardTitle>Top Selling Products</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-[200px]">
-          <p className="text-muted-foreground">No hay ventas este mes</p>
+          <p className="text-muted-foreground">No sales this month</p>
         </CardContent>
       </Card>
     );
@@ -34,7 +34,7 @@ export function TopProducts({ products }: TopProductsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Productos Más Vendidos</CardTitle>
+        <CardTitle>Top Selling Products</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -50,7 +50,7 @@ export function TopProducts({ products }: TopProductsProps) {
                 <div>
                   <p className="font-medium">{product.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {product.totalSold} vendidos
+                    {product.totalSold} sold
                   </p>
                 </div>
               </div>

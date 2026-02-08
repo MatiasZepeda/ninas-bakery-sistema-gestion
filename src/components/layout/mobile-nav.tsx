@@ -12,31 +12,11 @@ import {
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  {
-    title: 'Dashboard',
-    url: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    title: 'Gastos',
-    url: '/dashboard/gastos',
-    icon: Receipt,
-  },
-  {
-    title: 'Ventas',
-    url: '/dashboard/ventas',
-    icon: ShoppingCart,
-  },
-  {
-    title: 'Productos',
-    url: '/dashboard/productos',
-    icon: Package,
-  },
-  {
-    title: 'Reportes',
-    url: '/dashboard/reportes',
-    icon: BarChart3,
-  },
+  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Expenses', url: '/dashboard/gastos', icon: Receipt },
+  { title: 'Sales', url: '/dashboard/ventas', icon: ShoppingCart },
+  { title: 'Products', url: '/dashboard/productos', icon: Package },
+  { title: 'Reports', url: '/dashboard/reportes', icon: BarChart3 },
 ];
 
 export function MobileNav() {
@@ -54,7 +34,7 @@ export function MobileNav() {
               className={cn(
                 'flex flex-col items-center justify-center gap-1 flex-1 h-full',
                 isActive
-                  ? 'text-rose-600'
+                  ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >

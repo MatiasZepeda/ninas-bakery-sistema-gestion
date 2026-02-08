@@ -33,7 +33,6 @@ import {
 import { toast } from 'sonner';
 import { Loader2, CalendarIcon, Plus, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface SaleFormDialogProps {
@@ -50,18 +49,18 @@ interface SaleItemInput {
 }
 
 const paymentMethods = [
-  { value: 'cash', label: 'Efectivo' },
-  { value: 'debit', label: 'Débito' },
-  { value: 'credit', label: 'Crédito' },
-  { value: 'transfer', label: 'Transferencia' },
+  { value: 'cash', label: 'Cash' },
+  { value: 'debit', label: 'Debit' },
+  { value: 'credit', label: 'Credit' },
+  { value: 'transfer', label: 'Transfer' },
 ];
 
-const channels = ['Tienda', 'Web', 'Delivery', 'WhatsApp', 'Instagram'];
+const channels = ['Store', 'Web', 'Delivery', 'WhatsApp', 'Instagram'];
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
   }).format(value);
 }
@@ -140,7 +139,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
 
     const validItems = items.filter((item) => item.productId && item.quantity > 0);
     if (validItems.length === 0) {
-      toast.error('Agrega al menos un producto');
+      toast.error('Add at least one product');
       return;
     }
 
@@ -148,7 +147,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No autorizado');
+      if (!user) throw new Error('Unauthorized');
 
       // Create sale
       const { data: sale, error: saleError } = await supabase
@@ -184,12 +183,12 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
 
       if (itemsError) throw itemsError;
 
-      toast.success('Venta registrada');
+      toast.success('Sale recorded');
       setOpen(false);
       resetForm();
       router.refresh();
     } catch (error) {
-      toast.error('Error al registrar la venta');
+      toast.error('Error recording sale');
       console.error(error);
     } finally {
       setLoading(false);
@@ -201,16 +200,16 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nueva Venta</DialogTitle>
+          <DialogTitle>New Sale</DialogTitle>
           <DialogDescription>
-            Registra una nueva venta con los productos vendidos
+            Record a new sale with the products sold
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Fecha *</Label>
+                <Label>Date *</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -222,7 +221,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
                       disabled={loading}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, 'dd/MM/yyyy') : 'Seleccionar'}
+                      {date ? format(date, 'MM/dd/yyyy') : 'Select'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -230,19 +229,18 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
                       mode="single"
                       selected={date}
                       onSelect={(d) => d && setDate(d)}
-                      locale={es}
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customerName">Cliente</Label>
+                <Label htmlFor="customerName">Customer</Label>
                 <Input
                   id="customerName"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Nombre del cliente"
+                  placeholder="Customer name"
                   disabled={loading}
                 />
               </div>
@@ -250,10 +248,10 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="channel">Canal de Venta</Label>
+                <Label htmlFor="channel">Sales Channel</Label>
                 <Select value={channel} onValueChange={setChannel} disabled={loading}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar canal" />
+                    <SelectValue placeholder="Select channel" />
                   </SelectTrigger>
                   <SelectContent>
                     {channels.map((ch) => (
@@ -265,14 +263,14 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="paymentMethod">Método de Pago</Label>
+                <Label htmlFor="paymentMethod">Payment Method</Label>
                 <Select
                   value={paymentMethod}
                   onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
                   disabled={loading}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar método" />
+                    <SelectValue placeholder="Select method" />
                   </SelectTrigger>
                   <SelectContent>
                     {paymentMethods.map((method) => (
@@ -287,24 +285,24 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Productos *</Label>
+                <Label>Products *</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addItem} disabled={loading}>
                   <Plus className="h-4 w-4 mr-1" />
-                  Agregar
+                  Add
                 </Button>
               </div>
 
               {items.map((item, index) => (
                 <div key={index} className="flex items-end gap-2 p-3 bg-muted/50 rounded-lg">
                   <div className="flex-1 space-y-1">
-                    <Label className="text-xs">Producto</Label>
+                    <Label className="text-xs">Product</Label>
                     <Select
                       value={item.productId}
                       onValueChange={(v) => updateItem(index, 'productId', v)}
                       disabled={loading}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar" />
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
                         {products.map((product) => (
@@ -316,7 +314,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
                     </Select>
                   </div>
                   <div className="w-20 space-y-1">
-                    <Label className="text-xs">Cant.</Label>
+                    <Label className="text-xs">Qty</Label>
                     <Input
                       type="number"
                       min="1"
@@ -326,7 +324,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
                     />
                   </div>
                   <div className="w-24 space-y-1">
-                    <Label className="text-xs">Precio</Label>
+                    <Label className="text-xs">Price</Label>
                     <Input
                       type="number"
                       min="0"
@@ -349,12 +347,12 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Notas</Label>
+              <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notas adicionales..."
+                placeholder="Additional notes..."
                 rows={2}
                 disabled={loading}
               />
@@ -362,7 +360,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
 
             <div className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
               <div>
-                <span className="text-sm text-muted-foreground">Costo:</span>
+                <span className="text-sm text-muted-foreground">Cost:</span>
                 <p className="font-medium">{formatCurrency(totalCost)}</p>
               </div>
               <div>
@@ -370,7 +368,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
                 <p className="font-bold text-lg">{formatCurrency(totalAmount)}</p>
               </div>
               <div>
-                <span className="text-sm text-muted-foreground">Ganancia:</span>
+                <span className="text-sm text-muted-foreground">Profit:</span>
                 <p className={cn('font-bold text-lg', profit >= 0 ? 'text-green-600' : 'text-red-600')}>
                   {profit >= 0 ? '+' : ''}{formatCurrency(profit)}
                 </p>
@@ -380,11 +378,11 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
-              Cancelar
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Registrar Venta
+              Record Sale
             </Button>
           </DialogFooter>
         </form>

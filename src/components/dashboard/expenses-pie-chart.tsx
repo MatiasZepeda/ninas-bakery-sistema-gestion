@@ -29,10 +29,10 @@ export function ExpensesPieChart({ data }: ExpensesPieChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Gastos por Categoría</CardTitle>
+          <CardTitle>Expenses by Category</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-[300px]">
-          <p className="text-muted-foreground">No hay gastos este mes</p>
+          <p className="text-muted-foreground">No expenses this month</p>
         </CardContent>
       </Card>
     );
@@ -41,7 +41,7 @@ export function ExpensesPieChart({ data }: ExpensesPieChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Gastos por Categoría</CardTitle>
+        <CardTitle>Expenses by Category</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -53,9 +53,9 @@ export function ExpensesPieChart({ data }: ExpensesPieChartProps) {
                     <div className="flex items-center gap-2">
                       <span>{name}:</span>
                       <span className="font-bold">
-                        {new Intl.NumberFormat('es-CL', {
+                        {new Intl.NumberFormat('en-US', {
                           style: 'currency',
-                          currency: 'CLP',
+                          currency: 'USD',
                           minimumFractionDigits: 0,
                         }).format(Number(value))}
                       </span>

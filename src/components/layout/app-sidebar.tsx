@@ -25,11 +25,11 @@ import {
 
 const menuItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Gastos', url: '/dashboard/gastos', icon: Receipt },
-  { title: 'Ventas', url: '/dashboard/ventas', icon: ShoppingCart },
-  { title: 'Productos', url: '/dashboard/productos', icon: Package },
-  { title: 'Reportes', url: '/dashboard/reportes', icon: BarChart3 },
-  { title: 'Configuración', url: '/dashboard/configuracion', icon: Settings },
+  { title: 'Expenses', url: '/dashboard/gastos', icon: Receipt },
+  { title: 'Sales', url: '/dashboard/ventas', icon: ShoppingCart },
+  { title: 'Products', url: '/dashboard/productos', icon: Package },
+  { title: 'Reports', url: '/dashboard/reportes', icon: BarChart3 },
+  { title: 'Settings', url: '/dashboard/configuracion', icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -54,7 +54,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-nina-brown/70">Menú</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-nina-brown/70">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (

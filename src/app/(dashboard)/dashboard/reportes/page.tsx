@@ -109,7 +109,7 @@ async function getReportData() {
   const categoryTotals: Record<string, { amount: number; color: string }> = {};
   expensesByCategory?.forEach((e) => {
     const cat = e.category as unknown as { name: string; color: string } | null;
-    const catName = cat?.name || 'Sin categoría';
+    const catName = cat?.name || 'Uncategorized';
     const catColor = cat?.color || '#888888';
     if (!categoryTotals[catName]) {
       categoryTotals[catName] = { amount: 0, color: catColor };
@@ -134,25 +134,25 @@ export default async function ReportesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Reportes</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Reports</h2>
         <p className="text-muted-foreground">
-          Análisis financiero y rendimiento del negocio
+          Financial analysis and business performance
         </p>
       </div>
 
       <Tabs defaultValue="pnl" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="pnl">Estado de Resultados</TabsTrigger>
-          <TabsTrigger value="cashflow">Flujo de Caja</TabsTrigger>
-          <TabsTrigger value="products">Productos</TabsTrigger>
+          <TabsTrigger value="pnl">Profit & Loss</TabsTrigger>
+          <TabsTrigger value="cashflow">Cash Flow</TabsTrigger>
+          <TabsTrigger value="products">Products</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pnl">
           <Card>
             <CardHeader>
-              <CardTitle>Estado de Resultados (P&L)</CardTitle>
+              <CardTitle>Profit & Loss Statement</CardTitle>
               <CardDescription>
-                Resumen de ingresos, costos y ganancias de los últimos 12 meses
+                Summary of revenue, costs and profits for the last 12 months
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -164,9 +164,9 @@ export default async function ReportesPage() {
         <TabsContent value="cashflow">
           <Card>
             <CardHeader>
-              <CardTitle>Flujo de Caja</CardTitle>
+              <CardTitle>Cash Flow</CardTitle>
               <CardDescription>
-                Movimiento de efectivo entrante y saliente
+                Incoming and outgoing cash movement
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -178,9 +178,9 @@ export default async function ReportesPage() {
         <TabsContent value="products">
           <Card>
             <CardHeader>
-              <CardTitle>Rendimiento de Productos</CardTitle>
+              <CardTitle>Product Performance</CardTitle>
               <CardDescription>
-                Análisis de ventas y rentabilidad por producto
+                Sales and profitability analysis by product
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -22,17 +22,17 @@ import { Loader2, Save, Plus, Trash2 } from 'lucide-react';
 import { Category } from '@/types/database';
 
 const currencies = [
-  { value: 'CLP', label: 'Peso Chileno (CLP)' },
-  { value: 'USD', label: 'Dólar (USD)' },
+  { value: 'USD', label: 'US Dollar (USD)' },
+  { value: 'CLP', label: 'Chilean Peso (CLP)' },
   { value: 'EUR', label: 'Euro (EUR)' },
-  { value: 'ARS', label: 'Peso Argentino (ARS)' },
-  { value: 'MXN', label: 'Peso Mexicano (MXN)' },
+  { value: 'ARS', label: 'Argentine Peso (ARS)' },
+  { value: 'MXN', label: 'Mexican Peso (MXN)' },
 ];
 
 export default function ConfiguracionPage() {
   const [loading, setLoading] = useState(false);
   const [businessName, setBusinessName] = useState('');
-  const [currency, setCurrency] = useState('CLP');
+  const [currency, setCurrency] = useState('USD');
   const [email, setEmail] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -58,7 +58,7 @@ export default function ConfiguracionPage() {
 
     if (profile) {
       setBusinessName(profile.business_name || '');
-      setCurrency(profile.currency || 'CLP');
+      setCurrency(profile.currency || 'USD');
     }
 
     const { data: cats } = await supabase
@@ -75,7 +75,7 @@ export default function ConfiguracionPage() {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No autorizado');
+      if (!user) throw new Error('Unauthorized');
 
       const { error } = await supabase
         .from('profiles')
@@ -87,10 +87,10 @@ export default function ConfiguracionPage() {
 
       if (error) throw error;
 
-      toast.success('Configuración guardada');
+      toast.success('Settings saved');
       router.refresh();
     } catch (error) {
-      toast.error('Error al guardar');
+      toast.error('Error saving');
       console.error(error);
     } finally {
       setLoading(false);
@@ -99,14 +99,14 @@ export default function ConfiguracionPage() {
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
-      toast.error('Ingresa un nombre para la categoría');
+      toast.error('Enter a category name');
       return;
     }
 
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No autorizado');
+      if (!user) throw new Error('Unauthorized');
 
       const { error } = await supabase.from('categories').insert({
         user_id: user.id,
@@ -117,11 +117,11 @@ export default function ConfiguracionPage() {
 
       if (error) throw error;
 
-      toast.success('Categoría creada');
+      toast.success('Category created');
       setNewCategoryName('');
       loadData();
     } catch (error) {
-      toast.error('Error al crear categoría');
+      toast.error('Error creating category');
       console.error(error);
     } finally {
       setLoading(false);
@@ -130,7 +130,7 @@ export default function ConfiguracionPage() {
 
   const handleDeleteCategory = async (category: Category) => {
     if (category.is_system) {
-      toast.error('No se pueden eliminar categorías del sistema');
+      toast.error('System categories cannot be deleted');
       return;
     }
 
@@ -143,10 +143,10 @@ export default function ConfiguracionPage() {
 
       if (error) throw error;
 
-      toast.success('Categoría eliminada');
+      toast.success('Category deleted');
       loadData();
     } catch (error) {
-      toast.error('Error al eliminar');
+      toast.error('Error deleting');
       console.error(error);
     } finally {
       setLoading(false);
@@ -159,36 +159,36 @@ export default function ConfiguracionPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Configuración</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
         <p className="text-muted-foreground">
-          Configura los datos de tu negocio y categorías
+          Configure your business data and categories
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Datos del Negocio</CardTitle>
+          <CardTitle>Business Information</CardTitle>
           <CardDescription>
-            Información básica de tu negocio
+            Basic information about your business
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Correo Electrónico</Label>
+            <Label htmlFor="email">Email</Label>
             <Input id="email" value={email} disabled />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="businessName">Nombre del Negocio</Label>
+            <Label htmlFor="businessName">Business Name</Label>
             <Input
               id="businessName"
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
-              placeholder="Mi Negocio"
+              placeholder="My Business"
               disabled={loading}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="currency">Moneda</Label>
+            <Label htmlFor="currency">Currency</Label>
             <Select value={currency} onValueChange={setCurrency} disabled={loading}>
               <SelectTrigger>
                 <SelectValue />
@@ -208,22 +208,22 @@ export default function ConfiguracionPage() {
             ) : (
               <Save className="mr-2 h-4 w-4" />
             )}
-            Guardar Cambios
+            Save Changes
           </Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Categorías</CardTitle>
+          <CardTitle>Categories</CardTitle>
           <CardDescription>
-            Gestiona las categorías de gastos y productos
+            Manage expense and product categories
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex gap-2">
             <Input
-              placeholder="Nueva categoría..."
+              placeholder="New category..."
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
               disabled={loading}
@@ -237,8 +237,8 @@ export default function ConfiguracionPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="expense">Gasto</SelectItem>
-                <SelectItem value="product">Producto</SelectItem>
+                <SelectItem value="expense">Expense</SelectItem>
+                <SelectItem value="product">Product</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={handleAddCategory} disabled={loading}>
@@ -247,7 +247,7 @@ export default function ConfiguracionPage() {
           </div>
 
           <div>
-            <h4 className="font-medium mb-2">Categorías de Gastos</h4>
+            <h4 className="font-medium mb-2">Expense Categories</h4>
             <div className="space-y-2">
               {expenseCategories.map((cat) => (
                 <div
@@ -258,7 +258,7 @@ export default function ConfiguracionPage() {
                   <span>{cat.name}</span>
                   <div className="flex items-center gap-2">
                     {cat.is_system && (
-                      <span className="text-xs text-muted-foreground">(Sistema)</span>
+                      <span className="text-xs text-muted-foreground">(System)</span>
                     )}
                     {!cat.is_system && (
                       <Button
@@ -279,7 +279,7 @@ export default function ConfiguracionPage() {
           <Separator />
 
           <div>
-            <h4 className="font-medium mb-2">Categorías de Productos</h4>
+            <h4 className="font-medium mb-2">Product Categories</h4>
             <div className="space-y-2">
               {productCategories.map((cat) => (
                 <div
@@ -290,7 +290,7 @@ export default function ConfiguracionPage() {
                   <span>{cat.name}</span>
                   <div className="flex items-center gap-2">
                     {cat.is_system && (
-                      <span className="text-xs text-muted-foreground">(Sistema)</span>
+                      <span className="text-xs text-muted-foreground">(System)</span>
                     )}
                     {!cat.is_system && (
                       <Button

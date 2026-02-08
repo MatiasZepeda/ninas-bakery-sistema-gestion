@@ -16,15 +16,15 @@ interface RevenueChartProps {
 
 const chartConfig = {
   revenue: {
-    label: 'Ingresos',
+    label: 'Revenue',
     color: 'hsl(var(--chart-1))',
   },
   expenses: {
-    label: 'Gastos',
+    label: 'Expenses',
     color: 'hsl(var(--chart-2))',
   },
   profit: {
-    label: 'Ganancia',
+    label: 'Profit',
     color: 'hsl(var(--chart-3))',
   },
 } satisfies ChartConfig;
@@ -33,7 +33,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ingresos vs Gastos</CardTitle>
+        <CardTitle>Revenue vs Expenses</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -49,7 +49,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) =>
-                new Intl.NumberFormat('es-CL', {
+                new Intl.NumberFormat('en-US', {
                   notation: 'compact',
                   compactDisplay: 'short',
                 }).format(value)
@@ -59,9 +59,9 @@ export function RevenueChart({ data }: RevenueChartProps) {
               content={
                 <ChartTooltipContent
                   formatter={(value) =>
-                    new Intl.NumberFormat('es-CL', {
+                    new Intl.NumberFormat('en-US', {
                       style: 'currency',
-                      currency: 'CLP',
+                      currency: 'USD',
                       minimumFractionDigits: 0,
                     }).format(Number(value))
                   }

@@ -86,7 +86,7 @@ export function ProductFormDialog({
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No autorizado');
+      if (!user) throw new Error('Unauthorized');
 
       const productData = {
         name,
@@ -105,21 +105,21 @@ export function ProductFormDialog({
           .eq('id', product.id);
 
         if (error) throw error;
-        toast.success('Producto actualizado');
+        toast.success('Product updated');
       } else {
         const { error } = await supabase
           .from('products')
           .insert(productData);
 
         if (error) throw error;
-        toast.success('Producto creado');
+        toast.success('Product created');
       }
 
       setIsOpen(false);
       resetForm();
       router.refresh();
     } catch (error) {
-      toast.error(isEditing ? 'Error al actualizar' : 'Error al crear');
+      toast.error(isEditing ? 'Error updating' : 'Error creating');
       console.error(error);
     } finally {
       setLoading(false);
@@ -136,42 +136,42 @@ export function ProductFormDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Editar Producto' : 'Nuevo Producto'}
+            {isEditing ? 'Edit Product' : 'New Product'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? 'Modifica los datos del producto'
-              : 'Agrega un nuevo producto a tu catálogo'}
+              ? 'Modify product details'
+              : 'Add a new product to your catalog'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre del Producto *</Label>
+              <Label htmlFor="name">Product Name *</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ej: Pan Francés"
+                placeholder="e.g. Alfajor"
                 required
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="sku">SKU / Código</Label>
+              <Label htmlFor="sku">SKU / Code</Label>
               <Input
                 id="sku"
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
-                placeholder="Ej: PAN-001"
+                placeholder="e.g. ALF-001"
                 disabled={loading}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="costPrice">Precio Costo *</Label>
+                <Label htmlFor="costPrice">Cost Price *</Label>
                 <Input
                   id="costPrice"
                   type="number"
@@ -185,7 +185,7 @@ export function ProductFormDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="salePrice">Precio Venta *</Label>
+                <Label htmlFor="salePrice">Sale Price *</Label>
                 <Input
                   id="salePrice"
                   type="number"
@@ -202,15 +202,15 @@ export function ProductFormDialog({
 
             {margin > 0 && (
               <p className={`text-sm ${margin >= 30 ? 'text-green-600' : margin >= 15 ? 'text-yellow-600' : 'text-red-600'}`}>
-                Margen de ganancia: {margin.toFixed(1)}%
+                Profit margin: {margin.toFixed(1)}%
               </p>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="category">Categoría</Label>
+              <Label htmlFor="category">Category</Label>
               <Select value={categoryId} onValueChange={setCategoryId} disabled={loading}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar categoría" />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
@@ -223,7 +223,7 @@ export function ProductFormDialog({
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="isActive">Producto activo</Label>
+              <Label htmlFor="isActive">Active product</Label>
               <Switch
                 id="isActive"
                 checked={isActive}
@@ -235,11 +235,11 @@ export function ProductFormDialog({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={loading}>
-              Cancelar
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditing ? 'Guardar Cambios' : 'Crear Producto'}
+              {isEditing ? 'Save Changes' : 'Create Product'}
             </Button>
           </DialogFooter>
         </form>

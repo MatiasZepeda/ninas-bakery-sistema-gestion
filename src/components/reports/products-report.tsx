@@ -34,14 +34,14 @@ interface ProductsReportProps {
 }
 
 const chartConfig = {
-  revenue: { label: 'Ingresos', color: 'hsl(var(--chart-1))' },
-  profit: { label: 'Ganancia', color: 'hsl(var(--chart-2))' },
+  revenue: { label: 'Revenue', color: 'hsl(var(--chart-1))' },
+  profit: { label: 'Profit', color: 'hsl(var(--chart-2))' },
 } satisfies ChartConfig;
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
   }).format(value);
 }
@@ -60,9 +60,9 @@ export function ProductsReport({ data }: ProductsReportProps) {
         const doc = new jsPDF();
 
         doc.setFontSize(18);
-        doc.text('Rendimiento de Productos', 14, 22);
+        doc.text('Product Performance', 14, 22);
         doc.setFontSize(11);
-        doc.text(`Generado: ${new Date().toLocaleDateString('es-CL')}`, 14, 30);
+        doc.text(`Generated: ${new Date().toLocaleDateString('en-US')}`, 14, 30);
 
         const tableData = data.map((product) => [
           product.name,
@@ -74,12 +74,12 @@ export function ProductsReport({ data }: ProductsReportProps) {
 
         (autoTable as { default: typeof autoTable.default }).default(doc, {
           startY: 40,
-          head: [['Producto', 'Vendidos', 'Ingresos', 'Ganancia', 'Margen']],
+          head: [['Product', 'Sold', 'Revenue', 'Profit', 'Margin']],
           body: tableData,
           theme: 'striped',
         });
 
-        doc.save('rendimiento-productos.pdf');
+        doc.save('product-performance.pdf');
       });
     });
   };
@@ -87,7 +87,7 @@ export function ProductsReport({ data }: ProductsReportProps) {
   if (data.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        No hay datos de productos para mostrar
+        No product data to display
       </div>
     );
   }
@@ -97,28 +97,28 @@ export function ProductsReport({ data }: ProductsReportProps) {
       <div className="flex justify-end">
         <Button variant="outline" size="sm" onClick={exportToPDF}>
           <Download className="mr-2 h-4 w-4" />
-          Exportar PDF
+          Export PDF
         </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-          <p className="text-sm text-blue-600">Ingresos Totales</p>
+          <p className="text-sm text-blue-600">Total Revenue</p>
           <p className="text-2xl font-bold text-blue-700">{formatCurrency(totalRevenue)}</p>
         </div>
         <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-          <p className="text-sm text-green-600">Ganancia Total</p>
+          <p className="text-sm text-green-600">Total Profit</p>
           <p className="text-2xl font-bold text-green-700">{formatCurrency(totalProfit)}</p>
         </div>
         <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
-          <p className="text-sm text-purple-600">Margen Promedio</p>
+          <p className="text-sm text-purple-600">Average Margin</p>
           <p className="text-2xl font-bold text-purple-700">{avgMargin.toFixed(1)}%</p>
         </div>
       </div>
 
       {top10.length > 0 && (
         <div>
-          <h4 className="font-medium mb-3">Top 10 Productos por Ingresos</h4>
+          <h4 className="font-medium mb-3">Top 10 Products by Revenue</h4>
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
             <BarChart
               data={top10}
@@ -132,7 +132,7 @@ export function ProductsReport({ data }: ProductsReportProps) {
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) =>
-                  new Intl.NumberFormat('es-CL', {
+                  new Intl.NumberFormat('en-US', {
                     notation: 'compact',
                   }).format(value)
                 }
@@ -162,13 +162,13 @@ export function ProductsReport({ data }: ProductsReportProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Producto</TableHead>
-              <TableHead className="text-right">Vendidos</TableHead>
-              <TableHead className="text-right">Ingresos</TableHead>
-              <TableHead className="text-right">Costo</TableHead>
-              <TableHead className="text-right">Ganancia</TableHead>
-              <TableHead className="text-right">Margen</TableHead>
-              <TableHead>Rendimiento</TableHead>
+              <TableHead>Product</TableHead>
+              <TableHead className="text-right">Sold</TableHead>
+              <TableHead className="text-right">Revenue</TableHead>
+              <TableHead className="text-right">Cost</TableHead>
+              <TableHead className="text-right">Profit</TableHead>
+              <TableHead className="text-right">Margin</TableHead>
+              <TableHead>Performance</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -209,16 +209,16 @@ export function ProductsReport({ data }: ProductsReportProps) {
                   {product.margin >= 30 ? (
                     <div className="flex items-center text-green-600">
                       <TrendingUp className="h-4 w-4 mr-1" />
-                      <span className="text-xs">Excelente</span>
+                      <span className="text-xs">Excellent</span>
                     </div>
                   ) : product.margin >= 15 ? (
                     <div className="flex items-center text-yellow-600">
-                      <span className="text-xs">Regular</span>
+                      <span className="text-xs">Average</span>
                     </div>
                   ) : (
                     <div className="flex items-center text-red-600">
                       <TrendingDown className="h-4 w-4 mr-1" />
-                      <span className="text-xs">Bajo</span>
+                      <span className="text-xs">Low</span>
                     </div>
                   )}
                 </TableCell>

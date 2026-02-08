@@ -43,11 +43,11 @@ export function DeleteProductDialog({
 
       if (error) throw error;
 
-      toast.success('Producto eliminado');
+      toast.success('Product deleted');
       onOpenChange(false);
       router.refresh();
     } catch (error) {
-      toast.error('Error al eliminar el producto');
+      toast.error('Error deleting product');
       console.error(error);
     } finally {
       setLoading(false);
@@ -58,21 +58,21 @@ export function DeleteProductDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+          <AlertDialogTitle>Delete product?</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción eliminará permanentemente &quot;{product.name}&quot; de tu catálogo.
-            Esta acción no se puede deshacer.
+            This action will permanently delete &quot;{product.name}&quot; from your catalog.
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={loading}
             className="bg-red-600 hover:bg-red-700"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Eliminar
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

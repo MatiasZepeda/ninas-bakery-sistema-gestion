@@ -68,15 +68,15 @@ export default async function VentasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Ventas</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Sales</h2>
           <p className="text-muted-foreground">
-            Registra y gestiona las ventas de tu negocio
+            Track and manage your sales
           </p>
         </div>
         <SaleFormDialog products={products}>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Nueva Venta
+            New Sale
           </Button>
         </SaleFormDialog>
       </div>

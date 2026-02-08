@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Nina's Bakery - Gestión",
-  description: "Sistema de gestión para Nina's Bakery - Sweet like home",
+  title: "Nina's Bakery - Management",
+  description: "Management system for Nina's Bakery - Sweet like home",
   icons: {
     icon: "/images/logo-circle.jpeg",
   },
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="en">
       <body className={inter.className}>
         {children}
         <Toaster position="top-right" richColors />

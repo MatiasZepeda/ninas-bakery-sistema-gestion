@@ -28,7 +28,6 @@ import {
 import { MoreHorizontal, Trash2, Search, Calendar, Eye } from 'lucide-react';
 import { DeleteSaleDialog } from './delete-sale-dialog';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 interface SaleWithItems extends Sale {
   items: (SaleItem & { product: Product | null })[];
@@ -40,16 +39,16 @@ interface SalesTableProps {
 }
 
 const paymentMethodLabels: Record<string, string> = {
-  cash: 'Efectivo',
-  debit: 'Débito',
-  credit: 'Crédito',
-  transfer: 'Transferencia',
+  cash: 'Cash',
+  debit: 'Debit',
+  credit: 'Credit',
+  transfer: 'Transfer',
 };
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
   }).format(value);
 }
@@ -73,7 +72,7 @@ export function SalesTable({ sales }: SalesTableProps) {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por cliente o canal..."
+            placeholder="Search by customer or channel..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -85,13 +84,13 @@ export function SalesTable({ sales }: SalesTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Canal</TableHead>
-              <TableHead>Productos</TableHead>
-              <TableHead>Método</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Channel</TableHead>
+              <TableHead>Products</TableHead>
+              <TableHead>Method</TableHead>
               <TableHead className="text-right">Total</TableHead>
-              <TableHead className="text-right">Ganancia</TableHead>
+              <TableHead className="text-right">Profit</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -99,7 +98,7 @@ export function SalesTable({ sales }: SalesTableProps) {
             {filteredSales.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                  {search ? 'No se encontraron ventas' : 'No hay ventas registradas'}
+                  {search ? 'No sales found' : 'No sales registered'}
                 </TableCell>
               </TableRow>
             ) : (
@@ -108,11 +107,11 @@ export function SalesTable({ sales }: SalesTableProps) {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      {format(new Date(sale.date), 'dd MMM yyyy', { locale: es })}
+                      {format(new Date(sale.date), 'MMM dd, yyyy')}
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">
-                    {sale.customer_name || 'Cliente General'}
+                    {sale.customer_name || 'General Customer'}
                   </TableCell>
                   <TableCell>
                     {sale.channel ? (
@@ -123,7 +122,7 @@ export function SalesTable({ sales }: SalesTableProps) {
                   </TableCell>
                   <TableCell>
                     <span className="text-muted-foreground">
-                      {sale.items.length} producto{sale.items.length !== 1 ? 's' : ''}
+                      {sale.items.length} product{sale.items.length !== 1 ? 's' : ''}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -147,14 +146,14 @@ export function SalesTable({ sales }: SalesTableProps) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setViewingSale(sale)}>
                           <Eye className="mr-2 h-4 w-4" />
-                          Ver Detalle
+                          View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setDeletingSale(sale)}
                           className="text-red-600"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -172,7 +171,7 @@ export function SalesTable({ sales }: SalesTableProps) {
             Total: <span className="font-bold">{formatCurrency(totalFiltered)}</span>
           </p>
           <p className="text-sm text-muted-foreground">
-            Ganancia: <span className="font-bold text-green-600">+{formatCurrency(totalProfit)}</span>
+            Profit: <span className="font-bold text-green-600">+{formatCurrency(totalProfit)}</span>
           </p>
         </div>
       )}
@@ -188,27 +187,27 @@ export function SalesTable({ sales }: SalesTableProps) {
       <Dialog open={!!viewingSale} onOpenChange={(open) => !open && setViewingSale(null)}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Detalle de Venta</DialogTitle>
+            <DialogTitle>Sale Details</DialogTitle>
           </DialogHeader>
           {viewingSale && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Fecha:</span>
+                  <span className="text-muted-foreground">Date:</span>
                   <p className="font-medium">
-                    {format(new Date(viewingSale.date), 'dd MMMM yyyy', { locale: es })}
+                    {format(new Date(viewingSale.date), 'MMMM dd, yyyy')}
                   </p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Cliente:</span>
-                  <p className="font-medium">{viewingSale.customer_name || 'Cliente General'}</p>
+                  <span className="text-muted-foreground">Customer:</span>
+                  <p className="font-medium">{viewingSale.customer_name || 'General Customer'}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Canal:</span>
+                  <span className="text-muted-foreground">Channel:</span>
                   <p className="font-medium">{viewingSale.channel || '-'}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Método de Pago:</span>
+                  <span className="text-muted-foreground">Payment Method:</span>
                   <p className="font-medium">
                     {viewingSale.payment_method
                       ? paymentMethodLabels[viewingSale.payment_method]
@@ -221,16 +220,16 @@ export function SalesTable({ sales }: SalesTableProps) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Producto</TableHead>
-                      <TableHead className="text-right">Cant.</TableHead>
-                      <TableHead className="text-right">Precio</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead className="text-right">Qty</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
                       <TableHead className="text-right">Subtotal</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {viewingSale.items.map((item) => (
                       <TableRow key={item.id}>
-                        <TableCell>{item.product?.name || 'Producto eliminado'}</TableCell>
+                        <TableCell>{item.product?.name || 'Deleted product'}</TableCell>
                         <TableCell className="text-right">{item.quantity}</TableCell>
                         <TableCell className="text-right">{formatCurrency(item.unit_price)}</TableCell>
                         <TableCell className="text-right">{formatCurrency(item.subtotal)}</TableCell>
@@ -242,22 +241,22 @@ export function SalesTable({ sales }: SalesTableProps) {
 
               <div className="flex justify-between pt-4 border-t">
                 <div>
-                  <span className="text-muted-foreground">Costo Total:</span>
+                  <span className="text-muted-foreground">Total Cost:</span>
                   <p className="font-medium">{formatCurrency(viewingSale.total_cost)}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Total Venta:</span>
+                  <span className="text-muted-foreground">Sale Total:</span>
                   <p className="font-bold text-lg">{formatCurrency(viewingSale.total_amount)}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Ganancia:</span>
+                  <span className="text-muted-foreground">Profit:</span>
                   <p className="font-bold text-lg text-green-600">+{formatCurrency(viewingSale.profit)}</p>
                 </div>
               </div>
 
               {viewingSale.notes && (
                 <div className="pt-4 border-t">
-                  <span className="text-muted-foreground">Notas:</span>
+                  <span className="text-muted-foreground">Notes:</span>
                   <p className="mt-1">{viewingSale.notes}</p>
                 </div>
               )}

@@ -29,9 +29,9 @@ interface ProductsTableProps {
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
   }).format(value);
 }
@@ -53,7 +53,7 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar productos..."
+            placeholder="Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -65,13 +65,13 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Producto</TableHead>
+              <TableHead>Product</TableHead>
               <TableHead>SKU</TableHead>
-              <TableHead>Categoría</TableHead>
-              <TableHead className="text-right">Costo</TableHead>
-              <TableHead className="text-right">Precio Venta</TableHead>
-              <TableHead className="text-right">Margen</TableHead>
-              <TableHead>Estado</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead className="text-right">Cost</TableHead>
+              <TableHead className="text-right">Sale Price</TableHead>
+              <TableHead className="text-right">Margin</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -79,7 +79,7 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
             {filteredProducts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                  {search ? 'No se encontraron productos' : 'No hay productos registrados'}
+                  {search ? 'No products found' : 'No products registered'}
                 </TableCell>
               </TableRow>
             ) : (
@@ -119,7 +119,7 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
                     </TableCell>
                     <TableCell>
                       <Badge variant={product.is_active ? 'default' : 'secondary'}>
-                        {product.is_active ? 'Activo' : 'Inactivo'}
+                        {product.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -132,14 +132,14 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setEditingProduct(product)}>
                             <Pencil className="mr-2 h-4 w-4" />
-                            Editar
+                            Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => setDeletingProduct(product)}
                             className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
+                            Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

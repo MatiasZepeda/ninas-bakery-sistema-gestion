@@ -62,15 +62,15 @@ export default async function ProductosPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Productos</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Products</h2>
           <p className="text-muted-foreground">
-            Gestiona tu catálogo de productos y servicios
+            Manage your product catalog
           </p>
         </div>
         <ProductFormDialog categories={categories}>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Nuevo Producto
+            New Product
           </Button>
         </ProductFormDialog>
       </div>

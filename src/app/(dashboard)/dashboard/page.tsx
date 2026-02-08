@@ -123,7 +123,7 @@ async function getDashboardData() {
   const monthlyData = [];
   for (let i = 5; i >= 0; i--) {
     const monthDate = new Date(currentYear, currentMonth - i, 1);
-    const monthStr = monthDate.toLocaleDateString('es-CL', { month: 'short' });
+    const monthStr = monthDate.toLocaleDateString('en-US', { month: 'short' });
     const monthStart = new Date(currentYear, currentMonth - i, 1).toISOString().split('T')[0];
     const monthEnd = new Date(currentYear, currentMonth - i + 1, 0).toISOString().split('T')[0];
 
@@ -147,7 +147,7 @@ async function getDashboardData() {
   const categoryTotals: Record<string, { amount: number; color: string }> = {};
   expensesByCategory?.forEach((e) => {
     const cat = e.category as unknown as { name: string; color: string } | null;
-    const catName = cat?.name || 'Sin categoría';
+    const catName = cat?.name || 'Uncategorized';
     const catColor = cat?.color || '#888888';
     if (!categoryTotals[catName]) {
       categoryTotals[catName] = { amount: 0, color: catColor };
@@ -218,7 +218,7 @@ export default async function DashboardPage() {
   const data = await getDashboardData();
 
   if (!data) {
-    return <div>Error al cargar datos</div>;
+    return <div>Error loading data</div>;
   }
 
   return (

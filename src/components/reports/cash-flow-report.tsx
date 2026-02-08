@@ -31,14 +31,14 @@ interface CashFlowReportProps {
 }
 
 const chartConfig = {
-  cashIn: { label: 'Entradas', color: 'hsl(var(--chart-1))' },
-  cashOut: { label: 'Salidas', color: 'hsl(var(--chart-2))' },
+  cashIn: { label: 'Cash In', color: 'hsl(var(--chart-1))' },
+  cashOut: { label: 'Cash Out', color: 'hsl(var(--chart-2))' },
 } satisfies ChartConfig;
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CL', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CLP',
+    currency: 'USD',
     minimumFractionDigits: 0,
   }).format(value);
 }
@@ -66,9 +66,9 @@ export function CashFlowReport({ data }: CashFlowReportProps) {
         const doc = new jsPDF();
 
         doc.setFontSize(18);
-        doc.text('Flujo de Caja', 14, 22);
+        doc.text('Cash Flow', 14, 22);
         doc.setFontSize(11);
-        doc.text(`Generado: ${new Date().toLocaleDateString('es-CL')}`, 14, 30);
+        doc.text(`Generated: ${new Date().toLocaleDateString('en-US')}`, 14, 30);
 
         const tableData = dataWithBalance.map((month) => [
           month.month,
@@ -88,12 +88,12 @@ export function CashFlowReport({ data }: CashFlowReportProps) {
 
         (autoTable as { default: typeof autoTable.default }).default(doc, {
           startY: 40,
-          head: [['Mes', 'Entradas', 'Salidas', 'Flujo Neto', 'Balance']],
+          head: [['Month', 'Cash In', 'Cash Out', 'Net Flow', 'Balance']],
           body: tableData,
           theme: 'striped',
         });
 
-        doc.save('flujo-caja.pdf');
+        doc.save('cash-flow.pdf');
       });
     });
   };
@@ -103,22 +103,22 @@ export function CashFlowReport({ data }: CashFlowReportProps) {
       <div className="flex justify-end">
         <Button variant="outline" size="sm" onClick={exportToPDF}>
           <Download className="mr-2 h-4 w-4" />
-          Exportar PDF
+          Export PDF
         </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-          <p className="text-sm text-green-600">Total Entradas</p>
+          <p className="text-sm text-green-600">Total Cash In</p>
           <p className="text-2xl font-bold text-green-700">{formatCurrency(totals.cashIn)}</p>
         </div>
         <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-          <p className="text-sm text-red-600">Total Salidas</p>
+          <p className="text-sm text-red-600">Total Cash Out</p>
           <p className="text-2xl font-bold text-red-700">{formatCurrency(totals.cashOut)}</p>
         </div>
         <div className={`p-4 rounded-lg ${totals.netCashFlow >= 0 ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200'} border`}>
           <p className={`text-sm ${totals.netCashFlow >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-            Flujo Neto
+            Net Cash Flow
           </p>
           <p className={`text-2xl font-bold ${totals.netCashFlow >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
             {formatCurrency(totals.netCashFlow)}
@@ -134,7 +134,7 @@ export function CashFlowReport({ data }: CashFlowReportProps) {
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) =>
-              new Intl.NumberFormat('es-CL', {
+              new Intl.NumberFormat('en-US', {
                 notation: 'compact',
               }).format(value)
             }
@@ -156,11 +156,11 @@ export function CashFlowReport({ data }: CashFlowReportProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Mes</TableHead>
-              <TableHead className="text-right">Entradas</TableHead>
-              <TableHead className="text-right">Salidas</TableHead>
-              <TableHead className="text-right">Flujo Neto</TableHead>
-              <TableHead className="text-right">Balance Acum.</TableHead>
+              <TableHead>Month</TableHead>
+              <TableHead className="text-right">Cash In</TableHead>
+              <TableHead className="text-right">Cash Out</TableHead>
+              <TableHead className="text-right">Net Flow</TableHead>
+              <TableHead className="text-right">Cumul. Balance</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
