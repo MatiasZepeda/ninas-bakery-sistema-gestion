@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/popover';
 import { toast } from 'sonner';
 import { Loader2, CalendarIcon, Plus, Trash2 } from 'lucide-react';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ReceiptScanner } from './receipt-scanner';
 
@@ -141,13 +141,10 @@ export function ExpenseFormDialog({
 
     // Set date if found
     if (result.date) {
-      try {
-        const parsed = parse(result.date, 'yyyy-MM-dd', new Date());
-        if (!isNaN(parsed.getTime())) {
-          setDate(parsed);
-        }
-      } catch {
-        // keep current date
+      // Append T12:00:00 to avoid timezone offset shifting the day
+      const parsed = new Date(result.date + 'T12:00:00');
+      if (!isNaN(parsed.getTime())) {
+        setDate(parsed);
       }
     }
 

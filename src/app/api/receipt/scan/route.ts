@@ -53,11 +53,12 @@ Return ONLY valid JSON with this exact structure:
   "supplier": "Store Name"
 }
 
-Rules for item names:
-- Write the FULL, READABLE product name in Spanish as it appears on the receipt
-- Receipts often abbreviate names — expand abbreviations to the full product name when possible (e.g. "HNA TRIGO" → "Harina de Trigo", "AZ FLOR" → "Azúcar Flor", "LEV SECA" → "Levadura Seca", "MNT" → "Mantequilla")
-- If the name is a code or completely unreadable, keep the original text
-- Capitalize the first letter of each word (Title Case)
+Rules for item names — THIS IS CRITICAL:
+- Extract ONLY the simple, clean product name. Remove ALL brand names, size codes, prefixes, SKU codes, and store-specific abbreviations
+- Examples: "S & R Med Eggs" → "Eggs", "N Dulce de Leche" → "Dulce de Leche", "COLUN LCH ENTR 1L" → "Leche Entera", "MK Harina 000 1kg" → "Harina 000", "SOPROLE YOG GRIE" → "Yogurt Griego"
+- The name should be what a normal person would call the product — short, clean, no junk
+- Expand abbreviations to readable words (e.g. "HNA" → "Harina", "MNT" → "Mantequilla", "LCH" → "Leche", "AZ" → "Azúcar", "YOG" → "Yogurt")
+- Use Title Case
 - Do NOT use generic names like "Item 1" or "Product"
 
 Other rules:
