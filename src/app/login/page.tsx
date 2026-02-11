@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
@@ -11,52 +11,43 @@ export default function LoginPage() {
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (pin.length === 4) {
-      handlePinComplete(pin);
-    }
-  }, [pin]);
-
-  const handlePinComplete = async (enteredPin: string) => {
+  const handlePinComplete = useCallback(async (enteredPin: string) => {
     if (enteredPin !== APP_PIN) {
       setError(true);
       setTimeout(() => {
         setPin('');
         setError(false);
-        inputRef.current?.focus();
       }, 600);
       return;
     }
 
     setLoading(true);
-    // Set cookie to mark as authenticated
     document.cookie = 'pin_verified=true; path=/; max-age=31536000';
     router.push('/dashboard');
     router.refresh();
-  };
+  }, [router]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace') {
-      setPin((prev) => prev.slice(0, -1));
-      e.preventDefault();
+  useEffect(() => {
+    if (pin.length === 4) {
+      handlePinComplete(pin);
     }
-  };
+  }, [pin, handlePinComplete]);
 
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-    setPin(value);
-  };
-
-  const handleDotClick = () => {
-    inputRef.current?.focus();
-  };
+  // Desktop keyboard support
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (loading) return;
+      if (e.key >= '0' && e.key <= '9') {
+        setPin((prev) => (prev.length < 4 ? prev + e.key : prev));
+      } else if (e.key === 'Backspace') {
+        setPin((prev) => prev.slice(0, -1));
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [loading]);
 
   const handleNumPad = (digit: string) => {
     if (loading) return;
@@ -65,7 +56,6 @@ export default function LoginPage() {
     } else if (pin.length < 4) {
       setPin((prev) => prev + digit);
     }
-    inputRef.current?.focus();
   };
 
   return (
@@ -95,24 +85,8 @@ export default function LoginPage() {
           </div>
         ) : (
           <>
-            {/* Hidden input for keyboard support */}
-            <input
-              ref={inputRef}
-              type="tel"
-              inputMode="numeric"
-              value={pin}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              className="sr-only"
-              autoFocus
-              aria-label="PIN input"
-            />
-
             {/* PIN dots */}
-            <div
-              className={`flex justify-center gap-4 ${error ? 'animate-shake' : ''}`}
-              onClick={handleDotClick}
-            >
+            <div className={`flex justify-center gap-4 ${error ? 'animate-shake' : ''}`}>
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
@@ -133,6 +107,7 @@ export default function LoginPage() {
                   return (
                     <button
                       key={key}
+                      type="button"
                       onClick={() => handleNumPad(key)}
                       className={`h-14 rounded-xl text-lg font-medium transition-colors
                         ${
