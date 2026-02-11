@@ -2,55 +2,53 @@
 -- SCHEMA: Sistema de Gestión Empresarial
 -- Nina's Bakery
 -- =============================================
+-- This schema works WITHOUT Supabase Auth.
+-- Uses a fixed OWNER_ID for all data.
+-- RLS is DISABLED on all tables.
+-- =============================================
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Fixed owner ID (must match OWNER_ID in src/lib/constants.ts)
+-- 00000000-0000-0000-0000-000000000001
+
 -- =============================================
--- TABLE: profiles (extends auth.users)
+-- TABLE: profiles
 -- =============================================
-CREATE TABLE public.profiles (
-    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-    email TEXT NOT NULL,
-    business_name TEXT,
-    currency TEXT NOT NULL DEFAULT 'USD',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Enable RLS
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
--- Policies
-CREATE POLICY "Users can view own profile" ON public.profiles
-    FOR SELECT USING (auth.uid() = id);
-
-CREATE POLICY "Users can insert own profile" ON public.profiles
-    FOR INSERT WITH CHECK (auth.uid() = id);
-
-CREATE POLICY "Users can update own profile" ON public.profiles
-    FOR UPDATE USING (auth.uid() = id);
-
--- Trigger to create profile on signup
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+-- Drop existing FK constraint if profiles already exists
+DO $$
 BEGIN
-    INSERT INTO public.profiles (id, email)
-    VALUES (NEW.id, NEW.email);
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'profiles') THEN
+        -- Drop the FK to auth.users if it exists
+        ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_id_fkey;
+        -- Disable RLS
+        ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
+        -- Drop existing policies
+        DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
+        DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+        DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+    ELSE
+        CREATE TABLE public.profiles (
+            id UUID PRIMARY KEY,
+            email TEXT NOT NULL,
+            business_name TEXT,
+            currency TEXT NOT NULL DEFAULT 'USD',
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+    END IF;
+END $$;
 
-CREATE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+-- Ensure RLS is disabled
+ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
 
 -- =============================================
 -- TABLE: categories
 -- =============================================
-CREATE TABLE public.categories (
+CREATE TABLE IF NOT EXISTS public.categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID NOT NULL,
     name TEXT NOT NULL,
     type TEXT NOT NULL CHECK (type IN ('expense', 'product', 'both')),
     color TEXT,
@@ -58,28 +56,14 @@ CREATE TABLE public.categories (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Enable RLS
-ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
-
--- Policies
-CREATE POLICY "Users can view own categories" ON public.categories
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own categories" ON public.categories
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own categories" ON public.categories
-    FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own categories" ON public.categories
-    FOR DELETE USING (auth.uid() = user_id AND is_system = FALSE);
+ALTER TABLE public.categories DISABLE ROW LEVEL SECURITY;
 
 -- =============================================
 -- TABLE: products
 -- =============================================
-CREATE TABLE public.products (
+CREATE TABLE IF NOT EXISTS public.products (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID NOT NULL,
     name TEXT NOT NULL,
     sku TEXT,
     cost_price DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -90,28 +74,14 @@ CREATE TABLE public.products (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Enable RLS
-ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
-
--- Policies
-CREATE POLICY "Users can view own products" ON public.products
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own products" ON public.products
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own products" ON public.products
-    FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own products" ON public.products
-    FOR DELETE USING (auth.uid() = user_id);
+ALTER TABLE public.products DISABLE ROW LEVEL SECURITY;
 
 -- =============================================
 -- TABLE: expenses
 -- =============================================
-CREATE TABLE public.expenses (
+CREATE TABLE IF NOT EXISTS public.expenses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID NOT NULL,
     amount DECIMAL(12,2) NOT NULL,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
@@ -125,26 +95,12 @@ CREATE TABLE public.expenses (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Enable RLS
-ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
-
--- Policies
-CREATE POLICY "Users can view own expenses" ON public.expenses
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own expenses" ON public.expenses
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own expenses" ON public.expenses
-    FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own expenses" ON public.expenses
-    FOR DELETE USING (auth.uid() = user_id);
+ALTER TABLE public.expenses DISABLE ROW LEVEL SECURITY;
 
 -- =============================================
 -- TABLE: expense_items
 -- =============================================
-CREATE TABLE public.expense_items (
+CREATE TABLE IF NOT EXISTS public.expense_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     expense_id UUID REFERENCES public.expenses(id) ON DELETE CASCADE NOT NULL,
     name TEXT NOT NULL,
@@ -153,52 +109,14 @@ CREATE TABLE public.expense_items (
     total_price DECIMAL(12,2) NOT NULL DEFAULT 0
 );
 
--- Enable RLS
-ALTER TABLE public.expense_items ENABLE ROW LEVEL SECURITY;
-
--- Policies (based on parent expense ownership)
-CREATE POLICY "Users can view expense items" ON public.expense_items
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM public.expenses
-            WHERE expenses.id = expense_items.expense_id
-            AND expenses.user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Users can insert expense items" ON public.expense_items
-    FOR INSERT WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM public.expenses
-            WHERE expenses.id = expense_items.expense_id
-            AND expenses.user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Users can update expense items" ON public.expense_items
-    FOR UPDATE USING (
-        EXISTS (
-            SELECT 1 FROM public.expenses
-            WHERE expenses.id = expense_items.expense_id
-            AND expenses.user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Users can delete expense items" ON public.expense_items
-    FOR DELETE USING (
-        EXISTS (
-            SELECT 1 FROM public.expenses
-            WHERE expenses.id = expense_items.expense_id
-            AND expenses.user_id = auth.uid()
-        )
-    );
+ALTER TABLE public.expense_items DISABLE ROW LEVEL SECURITY;
 
 -- =============================================
 -- TABLE: sales
 -- =============================================
-CREATE TABLE public.sales (
+CREATE TABLE IF NOT EXISTS public.sales (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID NOT NULL,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     total_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
     total_cost DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -211,26 +129,12 @@ CREATE TABLE public.sales (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Enable RLS
-ALTER TABLE public.sales ENABLE ROW LEVEL SECURITY;
-
--- Policies
-CREATE POLICY "Users can view own sales" ON public.sales
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own sales" ON public.sales
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own sales" ON public.sales
-    FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own sales" ON public.sales
-    FOR DELETE USING (auth.uid() = user_id);
+ALTER TABLE public.sales DISABLE ROW LEVEL SECURITY;
 
 -- =============================================
 -- TABLE: sale_items
 -- =============================================
-CREATE TABLE public.sale_items (
+CREATE TABLE IF NOT EXISTS public.sale_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     sale_id UUID REFERENCES public.sales(id) ON DELETE CASCADE NOT NULL,
     product_id UUID REFERENCES public.products(id) ON DELETE SET NULL,
@@ -241,92 +145,22 @@ CREATE TABLE public.sale_items (
     subtotal DECIMAL(12,2) NOT NULL DEFAULT 0
 );
 
--- Enable RLS
-ALTER TABLE public.sale_items ENABLE ROW LEVEL SECURITY;
-
--- Policies (based on parent sale ownership)
-CREATE POLICY "Users can view sale items" ON public.sale_items
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM public.sales
-            WHERE sales.id = sale_items.sale_id
-            AND sales.user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Users can insert sale items" ON public.sale_items
-    FOR INSERT WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM public.sales
-            WHERE sales.id = sale_items.sale_id
-            AND sales.user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Users can update sale items" ON public.sale_items
-    FOR UPDATE USING (
-        EXISTS (
-            SELECT 1 FROM public.sales
-            WHERE sales.id = sale_items.sale_id
-            AND sales.user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Users can delete sale items" ON public.sale_items
-    FOR DELETE USING (
-        EXISTS (
-            SELECT 1 FROM public.sales
-            WHERE sales.id = sale_items.sale_id
-            AND sales.user_id = auth.uid()
-        )
-    );
+ALTER TABLE public.sale_items DISABLE ROW LEVEL SECURITY;
 
 -- =============================================
 -- INDEXES for performance
 -- =============================================
-CREATE INDEX idx_categories_user_id ON public.categories(user_id);
-CREATE INDEX idx_products_user_id ON public.products(user_id);
-CREATE INDEX idx_products_category_id ON public.products(category_id);
-CREATE INDEX idx_expenses_user_id ON public.expenses(user_id);
-CREATE INDEX idx_expenses_date ON public.expenses(date);
-CREATE INDEX idx_expenses_category_id ON public.expenses(category_id);
-CREATE INDEX idx_expense_items_expense_id ON public.expense_items(expense_id);
-CREATE INDEX idx_sales_user_id ON public.sales(user_id);
-CREATE INDEX idx_sales_date ON public.sales(date);
-CREATE INDEX idx_sale_items_sale_id ON public.sale_items(sale_id);
-CREATE INDEX idx_sale_items_product_id ON public.sale_items(product_id);
-
--- =============================================
--- FUNCTION: Insert default categories for new user
--- =============================================
-CREATE OR REPLACE FUNCTION public.create_default_categories()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Default expense categories
-    INSERT INTO public.categories (user_id, name, type, color, is_system) VALUES
-        (NEW.id, 'Ingredients', 'expense', '#FF6B6B', TRUE),
-        (NEW.id, 'Rent', 'expense', '#4ECDC4', TRUE),
-        (NEW.id, 'Salaries', 'expense', '#45B7D1', TRUE),
-        (NEW.id, 'Utilities', 'expense', '#96CEB4', TRUE),
-        (NEW.id, 'Marketing', 'expense', '#FFEAA7', TRUE),
-        (NEW.id, 'Transportation', 'expense', '#DDA0DD', TRUE),
-        (NEW.id, 'Other Expenses', 'expense', '#B0B0B0', TRUE);
-
-    -- Default product categories
-    INSERT INTO public.categories (user_id, name, type, color, is_system) VALUES
-        (NEW.id, 'Alfajores', 'product', '#FFB6C1', TRUE),
-        (NEW.id, 'Cookies', 'product', '#DEB887', TRUE),
-        (NEW.id, 'Cakes', 'product', '#F0E68C', TRUE),
-        (NEW.id, 'Drinks', 'product', '#87CEEB', TRUE),
-        (NEW.id, 'Other Products', 'product', '#D3D3D3', TRUE);
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER on_profile_created
-    AFTER INSERT ON public.profiles
-    FOR EACH ROW EXECUTE FUNCTION public.create_default_categories();
+CREATE INDEX IF NOT EXISTS idx_categories_user_id ON public.categories(user_id);
+CREATE INDEX IF NOT EXISTS idx_products_user_id ON public.products(user_id);
+CREATE INDEX IF NOT EXISTS idx_products_category_id ON public.products(category_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_user_id ON public.expenses(user_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_date ON public.expenses(date);
+CREATE INDEX IF NOT EXISTS idx_expenses_category_id ON public.expenses(category_id);
+CREATE INDEX IF NOT EXISTS idx_expense_items_expense_id ON public.expense_items(expense_id);
+CREATE INDEX IF NOT EXISTS idx_sales_user_id ON public.sales(user_id);
+CREATE INDEX IF NOT EXISTS idx_sales_date ON public.sales(date);
+CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id ON public.sale_items(sale_id);
+CREATE INDEX IF NOT EXISTS idx_sale_items_product_id ON public.sale_items(product_id);
 
 -- =============================================
 -- FUNCTION: Update updated_at timestamp
@@ -339,18 +173,55 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Create update triggers (drop first to avoid errors on re-run)
+DROP TRIGGER IF EXISTS update_products_updated_at ON public.products;
 CREATE TRIGGER update_products_updated_at
     BEFORE UPDATE ON public.products
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_expenses_updated_at ON public.expenses;
 CREATE TRIGGER update_expenses_updated_at
     BEFORE UPDATE ON public.expenses
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_sales_updated_at ON public.sales;
 CREATE TRIGGER update_sales_updated_at
     BEFORE UPDATE ON public.sales
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at
     BEFORE UPDATE ON public.profiles
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+-- =============================================
+-- DEFAULT DATA: Profile + Categories
+-- =============================================
+-- Insert default profile (skip if exists)
+INSERT INTO public.profiles (id, email, business_name, currency)
+VALUES ('00000000-0000-0000-0000-000000000001', 'owner@ninasbakery.local', 'Nina''s Bakery', 'USD')
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert default categories (only if none exist for this user)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM public.categories WHERE user_id = '00000000-0000-0000-0000-000000000001') THEN
+        -- Default expense categories
+        INSERT INTO public.categories (user_id, name, type, color, is_system) VALUES
+            ('00000000-0000-0000-0000-000000000001', 'Ingredients', 'expense', '#FF6B6B', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Rent', 'expense', '#4ECDC4', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Salaries', 'expense', '#45B7D1', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Utilities', 'expense', '#96CEB4', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Marketing', 'expense', '#FFEAA7', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Transportation', 'expense', '#DDA0DD', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Other Expenses', 'expense', '#B0B0B0', TRUE);
+
+        -- Default product categories
+        INSERT INTO public.categories (user_id, name, type, color, is_system) VALUES
+            ('00000000-0000-0000-0000-000000000001', 'Alfajores', 'product', '#FFB6C1', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Cookies', 'product', '#DEB887', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Cakes', 'product', '#F0E68C', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Drinks', 'product', '#87CEEB', TRUE),
+            ('00000000-0000-0000-0000-000000000001', 'Other Products', 'product', '#D3D3D3', TRUE);
+    END IF;
+END $$;
