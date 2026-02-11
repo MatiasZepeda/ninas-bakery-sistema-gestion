@@ -213,7 +213,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Date *</Label>
                 <Popover>
@@ -252,7 +252,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="customerPhone">Phone</Label>
                 <Input
@@ -279,7 +279,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="channel">Sales Channel</Label>
                 <Select value={channel} onValueChange={setChannel} disabled={loading}>

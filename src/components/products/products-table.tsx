@@ -129,13 +129,13 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
               <TableHead className={thClass} onClick={() => handleSort('name')}>
                 <span className="flex items-center">Product <SortIcon column="name" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className={thClass} onClick={() => handleSort('sku')}>
+              <TableHead className={`${thClass} hidden md:table-cell`} onClick={() => handleSort('sku')}>
                 <span className="flex items-center">SKU <SortIcon column="sku" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className={thClass} onClick={() => handleSort('category')}>
+              <TableHead className={`${thClass} hidden sm:table-cell`} onClick={() => handleSort('category')}>
                 <span className="flex items-center">Category <SortIcon column="category" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className={`${thClass} text-right`} onClick={() => handleSort('cost_price')}>
+              <TableHead className={`${thClass} hidden sm:table-cell text-right`} onClick={() => handleSort('cost_price')}>
                 <span className="flex items-center justify-end">Cost <SortIcon column="cost_price" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
               <TableHead className={`${thClass} text-right`} onClick={() => handleSort('sale_price')}>
@@ -144,7 +144,7 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
               <TableHead className={`${thClass} text-right`} onClick={() => handleSort('margin')}>
                 <span className="flex items-center justify-end">Margin <SortIcon column="margin" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
-              <TableHead className={thClass} onClick={() => handleSort('status')}>
+              <TableHead className={`${thClass} hidden md:table-cell`} onClick={() => handleSort('status')}>
                 <span className="flex items-center">Status <SortIcon column="status" sortKey={sortKey} sortDir={sortDir} /></span>
               </TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -164,10 +164,10 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
                 return (
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="text-muted-foreground hidden md:table-cell">
                       {product.sku || '-'}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {product.category ? (
                         <Badge
                           variant="outline"
@@ -179,7 +179,7 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
                         '-'
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right hidden sm:table-cell">
                       {formatCurrency(product.cost_price)}
                     </TableCell>
                     <TableCell className="text-right">
@@ -190,7 +190,7 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
                         {margin.toFixed(1)}%
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <Badge variant={product.is_active ? 'default' : 'secondary'}>
                         {product.is_active ? 'Active' : 'Inactive'}
                       </Badge>

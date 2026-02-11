@@ -85,10 +85,10 @@ export function SalesTable({ sales }: SalesTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Channel</TableHead>
-              <TableHead>Products</TableHead>
-              <TableHead>Method</TableHead>
+              <TableHead className="hidden sm:table-cell">Customer</TableHead>
+              <TableHead className="hidden sm:table-cell">Channel</TableHead>
+              <TableHead className="hidden md:table-cell">Products</TableHead>
+              <TableHead className="hidden sm:table-cell">Method</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead className="text-right">Profit</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -110,22 +110,22 @@ export function SalesTable({ sales }: SalesTableProps) {
                       {format(new Date(sale.date), 'MMM dd, yyyy')}
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium hidden sm:table-cell">
                     {sale.customer_name || 'General Customer'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     {sale.channel ? (
                       <Badge variant="outline">{sale.channel}</Badge>
                     ) : (
                       '-'
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <span className="text-muted-foreground">
                       {sale.items.length} product{sale.items.length !== 1 ? 's' : ''}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     {sale.payment_method
                       ? paymentMethodLabels[sale.payment_method]
                       : '-'}

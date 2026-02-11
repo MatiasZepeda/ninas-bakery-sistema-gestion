@@ -90,7 +90,7 @@ export default function LoginPage() {
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className={`w-4 h-4 rounded-full transition-all duration-200 ${
+                  className={`w-5 h-5 rounded-full transition-all duration-200 ${
                     pin.length > i
                       ? 'bg-nina-brown scale-110'
                       : 'bg-nina-cream border-2 border-nina-brown/30'

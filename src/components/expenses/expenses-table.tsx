@@ -102,10 +102,10 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Supplier</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Method</TableHead>
+              <TableHead className="hidden sm:table-cell">Description</TableHead>
+              <TableHead className="hidden md:table-cell">Supplier</TableHead>
+              <TableHead className="hidden sm:table-cell">Category</TableHead>
+              <TableHead className="hidden md:table-cell">Method</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
@@ -128,13 +128,13 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
                       {format(new Date(expense.date), 'MMM dd, yyyy')}
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium hidden sm:table-cell">
                     {expense.description || '-'}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground hidden md:table-cell">
                     {expense.supplier || '-'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     {expense.category ? (
                       <Badge
                         variant="outline"
@@ -146,7 +146,7 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
                       '-'
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     {expense.payment_method
                       ? paymentMethodLabels[expense.payment_method]
                       : '-'}
