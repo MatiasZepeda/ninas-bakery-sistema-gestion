@@ -11,9 +11,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 async function getDashboardData() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) return null;
 
   const now = new Date();
   const currentMonth = now.getMonth();

@@ -5,7 +5,6 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { LogOut } from 'lucide-react';
 
 const pageTitles: Record<string, string> = {
@@ -22,9 +21,8 @@ export function Header() {
   const router = useRouter();
   const title = pageTitles[pathname] || 'Dashboard';
 
-  const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+  const handleSignOut = () => {
+    document.cookie = 'pin_verified=; path=/; max-age=0';
     router.push('/login');
     router.refresh();
   };

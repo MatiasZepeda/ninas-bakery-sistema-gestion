@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Product, PaymentMethod } from '@/types/database';
+import { OWNER_ID } from '@/lib/constants';
 import {
   Dialog,
   DialogContent,
@@ -146,14 +147,11 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Unauthorized');
-
       // Create sale
       const { data: sale, error: saleError } = await supabase
         .from('sales')
         .insert({
-          user_id: user.id,
+          user_id: OWNER_ID,
           date: format(date, 'yyyy-MM-dd'),
           total_amount: totalAmount,
           total_cost: totalCost,

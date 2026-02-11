@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Product, Category } from '@/types/database';
+import { OWNER_ID } from '@/lib/constants';
 import {
   Dialog,
   DialogContent,
@@ -85,9 +86,6 @@ export function ProductFormDialog({
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Unauthorized');
-
       const productData = {
         name,
         sku: sku || null,
@@ -95,7 +93,7 @@ export function ProductFormDialog({
         sale_price: parseFloat(salePrice) || 0,
         category_id: categoryId || null,
         is_active: isActive,
-        user_id: user.id,
+        user_id: OWNER_ID,
       };
 
       if (isEditing) {

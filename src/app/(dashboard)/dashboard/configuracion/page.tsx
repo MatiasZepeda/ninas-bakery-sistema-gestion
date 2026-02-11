@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { OWNER_ID } from '@/lib/constants';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +32,6 @@ export default function ConfiguracionPage() {
   const [loading, setLoading] = useState(false);
   const [businessName, setBusinessName] = useState('');
   const [currency, setCurrency] = useState('USD');
-  const [email, setEmail] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryType, setNewCategoryType] = useState<'expense' | 'product'>('expense');
@@ -43,23 +43,17 @@ export default function ConfiguracionPage() {
   }, []);
 
   const loadData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    setEmail(user.email || '');
-
     // Try to get profile, create if doesn't exist
     let { data: profile } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', user.id)
+      .eq('id', OWNER_ID)
       .single();
 
     if (!profile) {
-      // Create profile if it doesn't exist
       const { data: newProfile } = await supabase
         .from('profiles')
-        .insert({ id: user.id, email: user.email || '' })
+        .insert({ id: OWNER_ID, email: 'owner@ninasbakery.local' })
         .select()
         .single();
       profile = newProfile;
@@ -83,16 +77,13 @@ export default function ConfiguracionPage() {
   const handleSaveProfile = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Unauthorized');
-
       const { error } = await supabase
         .from('profiles')
         .update({
           business_name: businessName,
           currency: currency,
         })
-        .eq('id', user.id);
+        .eq('id', OWNER_ID);
 
       if (error) throw error;
 
@@ -114,11 +105,8 @@ export default function ConfiguracionPage() {
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Unauthorized');
-
       const { error } = await supabase.from('categories').insert({
-        user_id: user.id,
+        user_id: OWNER_ID,
         name: newCategoryName,
         type: newCategoryType,
         is_system: false,
@@ -182,10 +170,6 @@ export default function ConfiguracionPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" value={email} disabled />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="businessName">Business Name</Label>
             <Input

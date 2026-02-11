@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Expense, Category, PaymentMethod } from '@/types/database';
+import { OWNER_ID } from '@/lib/constants';
 import {
   Dialog,
   DialogContent,
@@ -100,9 +101,6 @@ export function ExpenseFormDialog({
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Unauthorized');
-
       const expenseData = {
         amount: parseFloat(amount) || 0,
         date: format(date, 'yyyy-MM-dd'),
@@ -110,7 +108,7 @@ export function ExpenseFormDialog({
         supplier: supplier || null,
         description: description || null,
         payment_method: paymentMethod || null,
-        user_id: user.id,
+        user_id: OWNER_ID,
       };
 
       if (isEditing) {

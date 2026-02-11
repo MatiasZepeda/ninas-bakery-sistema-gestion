@@ -3,13 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
-import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const APP_PIN = process.env.NEXT_PUBLIC_APP_PIN || '1234';
-const AUTO_EMAIL = 'owner@ninasbakery.local';
-const AUTO_PASSWORD = 'NinasBakerySecure2024';
 
 export default function LoginPage() {
   const [pin, setPin] = useState('');
@@ -40,61 +36,10 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-    const supabase = createClient();
-
-    try {
-      // Try signing in first (account already exists)
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: AUTO_EMAIL,
-        password: AUTO_PASSWORD,
-      });
-
-      if (!signInError) {
-        router.push('/dashboard');
-        router.refresh();
-        return;
-      }
-
-      // Account doesn't exist - create it
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: AUTO_EMAIL,
-        password: AUTO_PASSWORD,
-      });
-
-      if (signUpError) throw signUpError;
-
-      if (signUpData.session) {
-        // Email confirmation disabled - we're signed in
-        router.push('/dashboard');
-        router.refresh();
-        return;
-      }
-
-      // Email confirmation is enabled - try signing in anyway
-      // (some Supabase configs auto-confirm)
-      const { error: retryError } = await supabase.auth.signInWithPassword({
-        email: AUTO_EMAIL,
-        password: AUTO_PASSWORD,
-      });
-
-      if (!retryError) {
-        router.push('/dashboard');
-        router.refresh();
-        return;
-      }
-
-      // Need to disable email confirmation in Supabase
-      toast.error(
-        'Setup needed: Go to Supabase > Authentication > Settings and disable "Confirm email"'
-      );
-      setPin('');
-    } catch (err) {
-      console.error('Auth error:', err);
-      toast.error('Connection error. Try again.');
-      setPin('');
-    } finally {
-      setLoading(false);
-    }
+    // Set cookie to mark as authenticated
+    document.cookie = 'pin_verified=true; path=/; max-age=31536000';
+    router.push('/dashboard');
+    router.refresh();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
