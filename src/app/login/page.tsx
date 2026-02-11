@@ -1,59 +1,132 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
-export default function LoginPage() {
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const supabase = createClient();
+const APP_PIN = process.env.NEXT_PUBLIC_APP_PIN || '1234';
+const AUTO_EMAIL = 'owner@ninasbakery.app';
+const AUTO_PASSWORD = 'NinasBakery$ecure2024!';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+export default function LoginPage() {
+  const [pin, setPin] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (pin.length === 4) {
+      handlePinComplete(pin);
+    }
+  }, [pin]);
+
+  const handlePinComplete = async (enteredPin: string) => {
+    if (enteredPin !== APP_PIN) {
+      setError(true);
+      setTimeout(() => {
+        setPin('');
+        setError(false);
+        inputRef.current?.focus();
+      }, 600);
+      return;
+    }
+
     setLoading(true);
+    const supabase = createClient();
 
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-        toast.success('Account created! You can now sign in.');
-        setIsSignUp(false);
-        setPassword('');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+      // Try signing in first (account already exists)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: AUTO_EMAIL,
+        password: AUTO_PASSWORD,
+      });
+
+      if (!signInError) {
         router.push('/dashboard');
         router.refresh();
+        return;
       }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Something went wrong';
-      toast.error(message);
+
+      // Account doesn't exist - create it
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: AUTO_EMAIL,
+        password: AUTO_PASSWORD,
+      });
+
+      if (signUpError) throw signUpError;
+
+      if (signUpData.session) {
+        // Email confirmation disabled - we're signed in
+        router.push('/dashboard');
+        router.refresh();
+        return;
+      }
+
+      // Email confirmation is enabled - try signing in anyway
+      // (some Supabase configs auto-confirm)
+      const { error: retryError } = await supabase.auth.signInWithPassword({
+        email: AUTO_EMAIL,
+        password: AUTO_PASSWORD,
+      });
+
+      if (!retryError) {
+        router.push('/dashboard');
+        router.refresh();
+        return;
+      }
+
+      // Need to disable email confirmation in Supabase
+      toast.error(
+        'Setup needed: Go to Supabase > Authentication > Settings and disable "Confirm email"'
+      );
+      setPin('');
+    } catch (err) {
+      console.error('Auth error:', err);
+      toast.error('Connection error. Try again.');
+      setPin('');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace') {
+      setPin((prev) => prev.slice(0, -1));
+      e.preventDefault();
+    }
+  };
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setPin(value);
+  };
+
+  const handleDotClick = () => {
+    inputRef.current?.focus();
+  };
+
+  const handleNumPad = (digit: string) => {
+    if (loading) return;
+    if (digit === 'del') {
+      setPin((prev) => prev.slice(0, -1));
+    } else if (pin.length < 4) {
+      setPin((prev) => prev + digit);
+    }
+    inputRef.current?.focus();
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center space-y-4">
+      <div className="w-full max-w-xs text-center space-y-8">
+        <div className="space-y-3">
           <div className="flex justify-center">
             <Image
               src="/images/logo-circle.jpeg"
@@ -64,73 +137,85 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <CardTitle className="text-2xl text-nina-brown">
+            <h1 className="text-2xl font-semibold text-nina-brown">
               Nina&apos;s Bakery
-            </CardTitle>
-            <CardDescription>
-              {isSignUp ? 'Create your account' : 'Sign in to manage your business'}
-            </CardDescription>
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">Enter PIN to continue</p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Your password"
-                required
-                minLength={6}
-                disabled={loading}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSignUp ? 'Create Account' : 'Sign In'}
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            {isSignUp ? (
-              <p>
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(false)}
-                  className="text-nina-brown font-medium underline-offset-4 hover:underline"
-                >
-                  Sign In
-                </button>
-              </p>
-            ) : (
-              <p>
-                No account yet?{' '}
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(true)}
-                  className="text-nina-brown font-medium underline-offset-4 hover:underline"
-                >
-                  Create Account
-                </button>
-              </p>
-            )}
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-nina-brown" />
           </div>
-        </CardContent>
-      </Card>
+        ) : (
+          <>
+            {/* Hidden input for keyboard support */}
+            <input
+              ref={inputRef}
+              type="tel"
+              inputMode="numeric"
+              value={pin}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              className="sr-only"
+              autoFocus
+              aria-label="PIN input"
+            />
+
+            {/* PIN dots */}
+            <div
+              className={`flex justify-center gap-4 ${error ? 'animate-shake' : ''}`}
+              onClick={handleDotClick}
+            >
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className={`w-4 h-4 rounded-full transition-all duration-200 ${
+                    pin.length > i
+                      ? 'bg-nina-brown scale-110'
+                      : 'bg-nina-cream border-2 border-nina-brown/30'
+                  } ${error ? 'bg-red-500' : ''}`}
+                />
+              ))}
+            </div>
+
+            {/* Number pad */}
+            <div className="grid grid-cols-3 gap-3 max-w-[240px] mx-auto">
+              {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map(
+                (key) => {
+                  if (key === '') return <div key="empty" />;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => handleNumPad(key)}
+                      className={`h-14 rounded-xl text-lg font-medium transition-colors
+                        ${
+                          key === 'del'
+                            ? 'text-muted-foreground hover:text-foreground text-sm'
+                            : 'text-nina-brown hover:bg-nina-cream active:bg-nina-cream/70'
+                        }`}
+                    >
+                      {key === 'del' ? '\u232B' : key}
+                    </button>
+                  );
+                }
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      <style jsx>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-8px); }
+          40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+          animation: shake 0.4s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }
