@@ -413,46 +413,49 @@ export function ExpenseFormDialog({
                 </div>
 
                 {items.map((item, index) => (
-                  <div key={index} className="flex items-end gap-2 p-3 bg-muted/50 rounded-lg">
-                    <div className="flex-1 space-y-1">
-                      <Label className="text-xs">Name</Label>
+                  <div key={index} className="p-3 bg-muted/50 rounded-lg space-y-2">
+                    <div className="flex items-center gap-2">
                       <Input
                         value={item.name}
                         onChange={(e) => updateItem(index, 'name', e.target.value)}
                         placeholder="Item name"
                         disabled={loading}
+                        className="flex-1"
                       />
-                    </div>
-                    <div className="w-16 space-y-1">
-                      <Label className="text-xs">Qty</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() => removeItem(index)}
                         disabled={loading}
-                      />
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
                     </div>
-                    <div className="w-24 space-y-1">
-                      <Label className="text-xs">Price</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.unit_price}
-                        onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
-                        disabled={loading}
-                      />
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 flex items-center gap-1.5">
+                        <Label className="text-xs text-muted-foreground shrink-0">Qty</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                          disabled={loading}
+                        />
+                      </div>
+                      <div className="flex-1 flex items-center gap-1.5">
+                        <Label className="text-xs text-muted-foreground shrink-0">Price</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={item.unit_price}
+                          onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                          disabled={loading}
+                        />
+                      </div>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(index)}
-                      disabled={loading}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
                   </div>
                 ))}
               </div>

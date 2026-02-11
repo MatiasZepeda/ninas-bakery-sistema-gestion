@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: `You are a receipt scanner. Extract items, prices, date, and supplier from receipt images.
+            content: `You are a receipt/ticket scanner for a small bakery business. Extract items, prices, date, and supplier from receipt images.
 Return ONLY valid JSON with this exact structure:
 {
   "items": [{"name": "item name", "quantity": 1, "unit_price": 100, "total_price": 100}],
@@ -53,12 +53,19 @@ Return ONLY valid JSON with this exact structure:
   "supplier": "Store Name"
 }
 
-Rules:
+Rules for item names:
+- Write the FULL, READABLE product name in Spanish as it appears on the receipt
+- Receipts often abbreviate names — expand abbreviations to the full product name when possible (e.g. "HNA TRIGO" → "Harina de Trigo", "AZ FLOR" → "Azúcar Flor", "LEV SECA" → "Levadura Seca", "MNT" → "Mantequilla")
+- If the name is a code or completely unreadable, keep the original text
+- Capitalize the first letter of each word (Title Case)
+- Do NOT use generic names like "Item 1" or "Product"
+
+Other rules:
 - All prices should be numbers (not strings), in the receipt's currency
 - quantity defaults to 1 if not clear
 - total_price = quantity * unit_price
 - date format: YYYY-MM-DD (null if not found)
-- supplier: the store/business name (null if not found)
+- supplier: the store/business name from the header of the receipt (null if not found)
 - If you cannot read the receipt clearly, return {"items": [], "total": null, "date": null, "supplier": null}
 - Do NOT include any text outside the JSON object`
           },
