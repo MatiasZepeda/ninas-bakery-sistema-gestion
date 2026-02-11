@@ -13,30 +13,43 @@ async function getReportData() {
   const now = new Date();
   const currentMonthStart = format(startOfMonth(now), 'yyyy-MM-dd');
   const currentMonthEnd = format(endOfMonth(now), 'yyyy-MM-dd');
+  const twelveMonthsAgo = format(startOfMonth(subMonths(now, 11)), 'yyyy-MM-dd');
 
-  // Last 12 months data
+  // Fetch all data in parallel (was 26 sequential queries, now 3 parallel)
+  const [
+    { data: allSales },
+    { data: allExpenses },
+    { data: saleItems },
+  ] = await Promise.all([
+    supabase
+      .from('sales')
+      .select('date, total_amount, total_cost, profit')
+      .gte('date', twelveMonthsAgo)
+      .order('date', { ascending: true }),
+    supabase
+      .from('expenses')
+      .select('date, amount, category:categories(name, color)')
+      .gte('date', twelveMonthsAgo)
+      .order('date', { ascending: true }),
+    supabase
+      .from('sale_items')
+      .select('quantity, subtotal, unit_cost, product:products(id, name, sale_price, cost_price)'),
+  ]);
+
+  // Process 12 months of data from the fetched results
   const monthsData = [];
   for (let i = 11; i >= 0; i--) {
     const monthDate = subMonths(now, i);
     const monthStart = format(startOfMonth(monthDate), 'yyyy-MM-dd');
     const monthEnd = format(endOfMonth(monthDate), 'yyyy-MM-dd');
 
-    const { data: sales } = await supabase
-      .from('sales')
-      .select('total_amount, total_cost, profit')
-      .gte('date', monthStart)
-      .lte('date', monthEnd);
+    const monthSales = allSales?.filter(s => s.date >= monthStart && s.date <= monthEnd) || [];
+    const monthExpenses = allExpenses?.filter(e => e.date >= monthStart && e.date <= monthEnd) || [];
 
-    const { data: expenses } = await supabase
-      .from('expenses')
-      .select('amount, category:categories(name)')
-      .gte('date', monthStart)
-      .lte('date', monthEnd);
-
-    const revenue = sales?.reduce((sum, s) => sum + Number(s.total_amount), 0) || 0;
-    const costOfGoods = sales?.reduce((sum, s) => sum + Number(s.total_cost), 0) || 0;
+    const revenue = monthSales.reduce((sum, s) => sum + Number(s.total_amount), 0);
+    const costOfGoods = monthSales.reduce((sum, s) => sum + Number(s.total_cost), 0);
     const grossProfit = revenue - costOfGoods;
-    const operatingExpenses = expenses?.reduce((sum, e) => sum + Number(e.amount), 0) || 0;
+    const operatingExpenses = monthExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
     const netProfit = grossProfit - operatingExpenses;
 
     monthsData.push({
@@ -54,15 +67,6 @@ async function getReportData() {
   }
 
   // Products performance
-  const { data: saleItems } = await supabase
-    .from('sale_items')
-    .select(`
-      quantity,
-      subtotal,
-      unit_cost,
-      product:products(id, name, sale_price, cost_price)
-    `);
-
   const productStats: Record<string, {
     name: string;
     totalSold: number;
@@ -99,15 +103,13 @@ async function getReportData() {
     }))
     .sort((a, b) => b.revenue - a.revenue);
 
-  // Expense breakdown by category (current month)
-  const { data: expensesByCategory } = await supabase
-    .from('expenses')
-    .select('amount, category:categories(name, color)')
-    .gte('date', currentMonthStart)
-    .lte('date', currentMonthEnd);
+  // Expense breakdown by category (current month) - use already-fetched data
+  const currentMonthExpenses = allExpenses?.filter(
+    e => e.date >= currentMonthStart && e.date <= currentMonthEnd
+  ) || [];
 
   const categoryTotals: Record<string, { amount: number; color: string }> = {};
-  expensesByCategory?.forEach((e) => {
+  currentMonthExpenses.forEach((e) => {
     const cat = e.category as unknown as { name: string; color: string } | null;
     const catName = cat?.name || 'Uncategorized';
     const catColor = cat?.color || '#888888';

@@ -20,81 +20,54 @@ async function getDashboardData() {
   const firstDayLastMonth = new Date(currentYear, currentMonth - 1, 1).toISOString().split('T')[0];
   const lastDayLastMonth = new Date(currentYear, currentMonth, 0).toISOString().split('T')[0];
 
-  // Current month sales
-  const { data: currentSales } = await supabase
-    .from('sales')
-    .select('total_amount, profit')
-    .gte('date', firstDayCurrentMonth)
-    .lte('date', lastDayCurrentMonth);
-
-  // Last month sales
-  const { data: lastMonthSales } = await supabase
-    .from('sales')
-    .select('total_amount, profit')
-    .gte('date', firstDayLastMonth)
-    .lte('date', lastDayLastMonth);
-
-  // Current month expenses
-  const { data: currentExpenses } = await supabase
-    .from('expenses')
-    .select('amount')
-    .gte('date', firstDayCurrentMonth)
-    .lte('date', lastDayCurrentMonth);
-
-  // Last month expenses
-  const { data: lastMonthExpenses } = await supabase
-    .from('expenses')
-    .select('amount')
-    .gte('date', firstDayLastMonth)
-    .lte('date', lastDayLastMonth);
-
-  // Last 6 months data for chart
+  // Fetch all data in parallel (was 10 sequential queries)
   const sixMonthsAgo = new Date(currentYear, currentMonth - 5, 1).toISOString().split('T')[0];
 
-  const { data: salesHistory } = await supabase
-    .from('sales')
-    .select('date, total_amount, profit')
-    .gte('date', sixMonthsAgo)
-    .order('date', { ascending: true });
+  const [
+    { data: salesHistory },
+    { data: expensesHistory },
+    { data: saleItems },
+    { data: recentSales },
+    { data: recentExpenses },
+  ] = await Promise.all([
+    // All sales from last 6 months (replaces 3 queries: current, last month, history)
+    supabase
+      .from('sales')
+      .select('date, total_amount, profit, created_at, customer_name, channel, payment_method')
+      .gte('date', sixMonthsAgo)
+      .order('date', { ascending: true }),
+    // All expenses from last 6 months with category (replaces 4 queries)
+    supabase
+      .from('expenses')
+      .select('date, amount, created_at, description, category:categories(name, color)')
+      .gte('date', sixMonthsAgo)
+      .order('date', { ascending: true }),
+    // Top products this month
+    supabase
+      .from('sale_items')
+      .select('quantity, subtotal, unit_cost, product:products(id, name), sale:sales!inner(date)')
+      .gte('sale.date', firstDayCurrentMonth)
+      .lte('sale.date', lastDayCurrentMonth),
+    // Recent sales
+    supabase
+      .from('sales')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    // Recent expenses
+    supabase
+      .from('expenses')
+      .select('*, category:categories(name)')
+      .order('created_at', { ascending: false })
+      .limit(5),
+  ]);
 
-  const { data: expensesHistory } = await supabase
-    .from('expenses')
-    .select('date, amount')
-    .gte('date', sixMonthsAgo)
-    .order('date', { ascending: true });
-
-  // Expenses by category
-  const { data: expensesByCategory } = await supabase
-    .from('expenses')
-    .select('amount, category:categories(name, color)')
-    .gte('date', firstDayCurrentMonth)
-    .lte('date', lastDayCurrentMonth);
-
-  // Top products this month
-  const { data: saleItems } = await supabase
-    .from('sale_items')
-    .select(`
-      quantity,
-      subtotal,
-      unit_cost,
-      product:products(id, name),
-      sale:sales!inner(date)
-    `)
-    .gte('sale.date', firstDayCurrentMonth)
-    .lte('sale.date', lastDayCurrentMonth);
-
-  // Recent transactions
-  const { data: recentSales } = await supabase
-    .from('sales')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(5);
-
-  const { data: recentExpenses } = await supabase
-    .from('expenses')
-    .select('*, category:categories(name)')
-    .order('created_at', { ascending: false })
-    .limit(5);
+  // Filter current/last month from the 6-month data (instead of separate queries)
+  const currentSales = salesHistory?.filter(s => s.date >= firstDayCurrentMonth && s.date <= lastDayCurrentMonth);
+  const lastMonthSales = salesHistory?.filter(s => s.date >= firstDayLastMonth && s.date <= lastDayLastMonth);
+  const currentExpenses = expensesHistory?.filter(e => e.date >= firstDayCurrentMonth && e.date <= lastDayCurrentMonth);
+  const lastMonthExpenses = expensesHistory?.filter(e => e.date >= firstDayLastMonth && e.date <= lastDayLastMonth);
+  const expensesByCategory = currentExpenses;
 
   // Calculate stats
   const totalRevenue = currentSales?.reduce((sum, s) => sum + Number(s.total_amount), 0) || 0;
