@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 
-const APP_PIN = process.env.NEXT_PUBLIC_APP_PIN || '1234';
+const APP_PIN = process.env.NEXT_PUBLIC_APP_PIN || '2026';
 
 export default function LoginPage() {
   const [pin, setPin] = useState('');
