@@ -442,21 +442,20 @@ export function ExpenseFormDialog({
                       <div className="flex-1 flex items-center gap-1.5">
                         <Label className="text-xs text-muted-foreground shrink-0">Qty</Label>
                         <Input
-                          type="number"
-                          min="1"
+                          type="text"
+                          inputMode="numeric"
                           value={item.quantity}
-                          onChange={(e) => updateItem(index, 'quantity', e.target.value)}
+                          onChange={(e) => updateItem(index, 'quantity', e.target.value.replace(/[^0-9]/g, ''))}
                           disabled={loading}
                         />
                       </div>
                       <div className="flex-1 flex items-center gap-1.5">
                         <Label className="text-xs text-muted-foreground shrink-0">Price</Label>
                         <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
                           value={item.unit_price}
-                          onChange={(e) => updateItem(index, 'unit_price', e.target.value)}
+                          onChange={(e) => updateItem(index, 'unit_price', e.target.value.replace(/[^0-9.]/g, ''))}
                           disabled={loading}
                         />
                       </div>
