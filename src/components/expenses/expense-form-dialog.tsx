@@ -104,7 +104,7 @@ export function ExpenseFormDialog({
       const expenseData = {
         amount: parseFloat(amount) || 0,
         date: format(date, 'yyyy-MM-dd'),
-        category_id: categoryId || null,
+        category_id: (categoryId && categoryId !== 'none') ? categoryId : null,
         supplier: supplier || null,
         description: description || null,
         payment_method: paymentMethod || null,
@@ -199,12 +199,13 @@ export function ExpenseFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">Category (optional)</Label>
               <Select value={categoryId} onValueChange={setCategoryId} disabled={loading}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder="No category" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">No category</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}

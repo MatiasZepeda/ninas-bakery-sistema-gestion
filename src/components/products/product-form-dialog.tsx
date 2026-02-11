@@ -91,7 +91,7 @@ export function ProductFormDialog({
         sku: sku || null,
         cost_price: parseFloat(costPrice) || 0,
         sale_price: parseFloat(salePrice) || 0,
-        category_id: categoryId || null,
+        category_id: (categoryId && categoryId !== 'none') ? categoryId : null,
         is_active: isActive,
         user_id: OWNER_ID,
       };
@@ -205,12 +205,13 @@ export function ProductFormDialog({
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">Category (optional)</Label>
               <Select value={categoryId} onValueChange={setCategoryId} disabled={loading}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder="No category" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">No category</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
