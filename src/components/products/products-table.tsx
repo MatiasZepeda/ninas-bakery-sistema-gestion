@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Product, Category } from '@/types/database';
 import {
   Table,
@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { MoreHorizontal, Pencil, Trash2, Search } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { ProductFormDialog } from './product-form-dialog';
 import { DeleteProductDialog } from './delete-product-dialog';
 
@@ -27,6 +27,9 @@ interface ProductsTableProps {
   products: (Product & { category: Category | null })[];
   categories: Category[];
 }
+
+type SortKey = 'name' | 'sku' | 'category' | 'cost_price' | 'sale_price' | 'margin' | 'status';
+type SortDir = 'asc' | 'desc';
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -36,16 +39,74 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
+function getMargin(product: Product): number {
+  return product.sale_price > 0
+    ? ((product.sale_price - product.cost_price) / product.sale_price) * 100
+    : 0;
+}
+
+function SortIcon({ column, sortKey, sortDir }: { column: SortKey; sortKey: SortKey | null; sortDir: SortDir }) {
+  if (sortKey !== column) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-40" />;
+  return sortDir === 'asc'
+    ? <ArrowUp className="ml-1 h-3 w-3" />
+    : <ArrowDown className="ml-1 h-3 w-3" />;
+}
+
 export function ProductsTable({ products, categories }: ProductsTableProps) {
   const [search, setSearch] = useState('');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.sku?.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const sortedProducts = useMemo(() => {
+    const filtered = products.filter(
+      (product) =>
+        product.name.toLowerCase().includes(search.toLowerCase()) ||
+        product.sku?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (!sortKey) return filtered;
+
+    return [...filtered].sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case 'name':
+          cmp = a.name.localeCompare(b.name);
+          break;
+        case 'sku':
+          cmp = (a.sku || '').localeCompare(b.sku || '');
+          break;
+        case 'category':
+          cmp = (a.category?.name || '').localeCompare(b.category?.name || '');
+          break;
+        case 'cost_price':
+          cmp = a.cost_price - b.cost_price;
+          break;
+        case 'sale_price':
+          cmp = a.sale_price - b.sale_price;
+          break;
+        case 'margin':
+          cmp = getMargin(a) - getMargin(b);
+          break;
+        case 'status':
+          cmp = Number(b.is_active) - Number(a.is_active);
+          break;
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [products, search, sortKey, sortDir]);
+
+  const thClass = "cursor-pointer select-none hover:text-foreground transition-colors";
 
   return (
     <div className="space-y-4">
@@ -65,28 +126,40 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Product</TableHead>
-              <TableHead>SKU</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead className="text-right">Cost</TableHead>
-              <TableHead className="text-right">Sale Price</TableHead>
-              <TableHead className="text-right">Margin</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className={thClass} onClick={() => handleSort('name')}>
+                <span className="flex items-center">Product <SortIcon column="name" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
+              <TableHead className={thClass} onClick={() => handleSort('sku')}>
+                <span className="flex items-center">SKU <SortIcon column="sku" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
+              <TableHead className={thClass} onClick={() => handleSort('category')}>
+                <span className="flex items-center">Category <SortIcon column="category" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
+              <TableHead className={`${thClass} text-right`} onClick={() => handleSort('cost_price')}>
+                <span className="flex items-center justify-end">Cost <SortIcon column="cost_price" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
+              <TableHead className={`${thClass} text-right`} onClick={() => handleSort('sale_price')}>
+                <span className="flex items-center justify-end">Sale Price <SortIcon column="sale_price" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
+              <TableHead className={`${thClass} text-right`} onClick={() => handleSort('margin')}>
+                <span className="flex items-center justify-end">Margin <SortIcon column="margin" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
+              <TableHead className={thClass} onClick={() => handleSort('status')}>
+                <span className="flex items-center">Status <SortIcon column="status" sortKey={sortKey} sortDir={sortDir} /></span>
+              </TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.length === 0 ? (
+            {sortedProducts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   {search ? 'No products found' : 'No products registered'}
                 </TableCell>
               </TableRow>
             ) : (
-              filteredProducts.map((product) => {
-                const margin = product.sale_price > 0
-                  ? ((product.sale_price - product.cost_price) / product.sale_price) * 100
-                  : 0;
+              sortedProducts.map((product) => {
+                const margin = getMargin(product);
 
                 return (
                   <TableRow key={product.id}>

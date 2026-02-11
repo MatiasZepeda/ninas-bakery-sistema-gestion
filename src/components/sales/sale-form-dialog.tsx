@@ -71,6 +71,8 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
   const [loading, setLoading] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
   const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [tipAmount, setTipAmount] = useState('');
   const [channel, setChannel] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('');
   const [notes, setNotes] = useState('');
@@ -83,6 +85,8 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
   const resetForm = () => {
     setDate(new Date());
     setCustomerName('');
+    setCustomerPhone('');
+    setTipAmount('');
     setChannel('');
     setPaymentMethod('');
     setNotes('');
@@ -129,11 +133,13 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
       totalCost += item.quantity * item.unitCost;
     });
 
+    const tip = parseFloat(tipAmount) || 0;
+    totalAmount += tip;
     const profit = totalAmount - totalCost;
-    return { totalAmount, totalCost, profit };
+    return { totalAmount, totalCost, profit, tip };
   };
 
-  const { totalAmount, totalCost, profit } = calculateTotals();
+  const { totalAmount, totalCost, profit, tip } = calculateTotals();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +165,8 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
           channel: channel || null,
           payment_method: paymentMethod || null,
           customer_name: customerName || null,
+          customer_phone: customerPhone || null,
+          tip_amount: tip,
           notes: notes || null,
         })
         .select()
@@ -239,6 +247,33 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Customer name"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="customerPhone">Phone</Label>
+                <Input
+                  id="customerPhone"
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="+56 9 1234 5678"
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tipAmount">Tip</Label>
+                <Input
+                  id="tipAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={tipAmount}
+                  onChange={(e) => setTipAmount(e.target.value)}
+                  placeholder="0"
                   disabled={loading}
                 />
               </div>
@@ -356,11 +391,17 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
               <div>
                 <span className="text-sm text-muted-foreground">Cost:</span>
                 <p className="font-medium">{formatCurrency(totalCost)}</p>
               </div>
+              {tip > 0 && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Tip:</span>
+                  <p className="font-medium">{formatCurrency(tip)}</p>
+                </div>
+              )}
               <div>
                 <span className="text-sm text-muted-foreground">Total:</span>
                 <p className="font-bold text-lg">{formatCurrency(totalAmount)}</p>

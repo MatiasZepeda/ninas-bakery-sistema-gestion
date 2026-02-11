@@ -124,6 +124,8 @@ CREATE TABLE IF NOT EXISTS public.sales (
     channel TEXT,
     payment_method TEXT CHECK (payment_method IN ('cash', 'debit', 'credit', 'transfer')),
     customer_name TEXT,
+    customer_phone TEXT,
+    tip_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
     notes TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
