@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Expense, Category } from '@/types/database';
+import { Expense, ExpenseItem, Category } from '@/types/database';
 import {
   Table,
   TableBody,
@@ -32,7 +32,7 @@ import { DeleteExpenseDialog } from './delete-expense-dialog';
 import { format } from 'date-fns';
 
 interface ExpensesTableProps {
-  expenses: (Expense & { category: Category | null })[];
+  expenses: (Expense & { category: Category | null; expense_items: ExpenseItem[] })[];
   categories: Category[];
 }
 
@@ -54,7 +54,7 @@ function formatCurrency(value: number): string {
 export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [editingExpense, setEditingExpense] = useState<(Expense & { expense_items?: ExpenseItem[] }) | null>(null);
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
 
   const filteredExpenses = expenses.filter((expense) => {
@@ -152,7 +152,14 @@ export function ExpensesTable({ expenses, categories }: ExpensesTableProps) {
                       : '-'}
                   </TableCell>
                   <TableCell className="text-right font-medium text-red-600">
-                    {formatCurrency(expense.amount)}
+                    <div className="flex items-center justify-end gap-1.5">
+                      {expense.expense_items?.length > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          {expense.expense_items.length} items
+                        </Badge>
+                      )}
+                      {formatCurrency(expense.amount)}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

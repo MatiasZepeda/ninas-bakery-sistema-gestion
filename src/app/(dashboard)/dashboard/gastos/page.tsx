@@ -13,7 +13,7 @@ async function getExpenses() {
 
   const { data: expenses, error } = await supabase
     .from('expenses')
-    .select('*, category:categories(*)')
+    .select('*, category:categories(*), expense_items(*)')
     .order('date', { ascending: false });
 
   if (error) {
