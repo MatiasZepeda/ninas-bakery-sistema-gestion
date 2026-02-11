@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const APP_PIN = process.env.NEXT_PUBLIC_APP_PIN || '1234';
-const AUTO_EMAIL = 'owner@ninasbakery.app';
-const AUTO_PASSWORD = 'NinasBakery$ecure2024!';
+const AUTO_EMAIL = 'owner@ninasbakery.local';
+const AUTO_PASSWORD = 'NinasBakerySecure2024';
 
 export default function LoginPage() {
   const [pin, setPin] = useState('');
