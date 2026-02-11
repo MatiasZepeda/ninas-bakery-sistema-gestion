@@ -47,8 +47,8 @@ interface ExpenseFormDialogProps {
 
 interface ExpenseItemInput {
   name: string;
-  quantity: number;
-  unit_price: number;
+  quantity: string;
+  unit_price: string;
 }
 
 const paymentMethods = [
@@ -97,8 +97,8 @@ export function ExpenseFormDialog({
         setItems(
           expense.expense_items.map((item) => ({
             name: item.name,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
+            quantity: String(item.quantity),
+            unit_price: String(item.unit_price),
           }))
         );
       } else {
@@ -129,8 +129,8 @@ export function ExpenseFormDialog({
     setItems(
       result.items.map((item) => ({
         name: item.name,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
+        quantity: String(item.quantity),
+        unit_price: String(item.unit_price),
       }))
     );
 
@@ -152,7 +152,7 @@ export function ExpenseFormDialog({
   };
 
   const addItem = () => {
-    setItems([...items, { name: '', quantity: 1, unit_price: 0 }]);
+    setItems([...items, { name: '', quantity: '1', unit_price: '' }]);
   };
 
   const removeItem = (index: number) => {
@@ -167,7 +167,7 @@ export function ExpenseFormDialog({
 
   // Calculate total from items
   const itemsTotal = items.reduce(
-    (sum, item) => sum + item.quantity * item.unit_price,
+    (sum, item) => sum + (parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0),
     0
   );
 
@@ -211,14 +211,18 @@ export function ExpenseFormDialog({
 
         if (items.length > 0) {
           const expenseItems = items
-            .filter((item) => item.name && item.unit_price > 0)
-            .map((item) => ({
-              expense_id: expense.id,
-              name: item.name,
-              quantity: item.quantity,
-              unit_price: item.unit_price,
-              total_price: item.quantity * item.unit_price,
-            }));
+            .filter((item) => item.name && parseFloat(item.unit_price) > 0)
+            .map((item) => {
+              const qty = parseFloat(item.quantity) || 1;
+              const price = parseFloat(item.unit_price) || 0;
+              return {
+                expense_id: expense.id,
+                name: item.name,
+                quantity: qty,
+                unit_price: price,
+                total_price: qty * price,
+              };
+            });
 
           if (expenseItems.length > 0) {
             const { error: itemsError } = await supabase
@@ -242,14 +246,18 @@ export function ExpenseFormDialog({
         // Insert items if any
         if (items.length > 0) {
           const expenseItems = items
-            .filter((item) => item.name && item.unit_price > 0)
-            .map((item) => ({
-              expense_id: newExpense.id,
-              name: item.name,
-              quantity: item.quantity,
-              unit_price: item.unit_price,
-              total_price: item.quantity * item.unit_price,
-            }));
+            .filter((item) => item.name && parseFloat(item.unit_price) > 0)
+            .map((item) => {
+              const qty = parseFloat(item.quantity) || 1;
+              const price = parseFloat(item.unit_price) || 0;
+              return {
+                expense_id: newExpense.id,
+                name: item.name,
+                quantity: qty,
+                unit_price: price,
+                total_price: qty * price,
+              };
+            });
 
           if (expenseItems.length > 0) {
             const { error: itemsError } = await supabase
@@ -305,7 +313,7 @@ export function ExpenseFormDialog({
                   <div className="h-10 px-3 py-2 rounded-md border bg-muted text-sm font-medium">
                     {itemsTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 })}
                     <span className="text-xs text-muted-foreground ml-1">
-                      ({items.filter(i => i.name && i.unit_price > 0).length} items)
+                      ({items.filter(i => i.name && parseFloat(i.unit_price) > 0).length} items)
                     </span>
                   </div>
                 ) : (
@@ -437,7 +445,7 @@ export function ExpenseFormDialog({
                           type="number"
                           min="1"
                           value={item.quantity}
-                          onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                          onChange={(e) => updateItem(index, 'quantity', e.target.value)}
                           disabled={loading}
                         />
                       </div>
@@ -448,7 +456,7 @@ export function ExpenseFormDialog({
                           min="0"
                           step="0.01"
                           value={item.unit_price}
-                          onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                          onChange={(e) => updateItem(index, 'unit_price', e.target.value)}
                           disabled={loading}
                         />
                       </div>

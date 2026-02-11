@@ -61,10 +61,13 @@ Rules for item names — THIS IS CRITICAL:
 - Use Title Case
 - Do NOT use generic names like "Item 1" or "Product"
 
-Other rules:
+Rules for quantity and prices — THIS IS CRITICAL:
+- Receipts often show quantity with the format "2 @ 1.89" meaning quantity=2, unit_price=1.89, total_price=3.78. ALWAYS parse this correctly
+- Other formats: "3 x 2.50", "QTY 2 @ 1.89", etc. — extract the quantity and per-unit price
+- When you see "@ price", that price is the UNIT price, not the total
 - All prices should be numbers (not strings), in the receipt's currency
-- quantity defaults to 1 if not clear
-- total_price = quantity * unit_price
+- quantity defaults to 1 if there is no quantity indicator
+- total_price = quantity * unit_price (always calculate this)
 - date format: YYYY-MM-DD (null if not found)
 - supplier: the store/business name from the header of the receipt (null if not found)
 - If you cannot read the receipt clearly, return {"items": [], "total": null, "date": null, "supplier": null}
