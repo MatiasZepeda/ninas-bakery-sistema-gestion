@@ -43,10 +43,10 @@ interface SaleFormDialogProps {
 
 interface SaleItemInput {
   productId: string;
-  quantity: number;
-  unitPrice: number;
+  quantity: string;
+  unitPrice: string;
   unitCost: number;
-  discount: number;
+  discount: string;
 }
 
 const paymentMethods = [
@@ -77,7 +77,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<SaleItemInput[]>([
-    { productId: '', quantity: 1, unitPrice: 0, unitCost: 0, discount: 0 },
+    { productId: '', quantity: '1', unitPrice: '', unitCost: 0, discount: '' },
   ]);
   const router = useRouter();
   const supabase = createClient();
@@ -90,11 +90,11 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
     setChannel('');
     setPaymentMethod('');
     setNotes('');
-    setItems([{ productId: '', quantity: 1, unitPrice: 0, unitCost: 0, discount: 0 }]);
+    setItems([{ productId: '', quantity: '1', unitPrice: '', unitCost: 0, discount: '' }]);
   };
 
   const addItem = () => {
-    setItems([...items, { productId: '', quantity: 1, unitPrice: 0, unitCost: 0, discount: 0 }]);
+    setItems([...items, { productId: '', quantity: '1', unitPrice: '', unitCost: 0, discount: '' }]);
   };
 
   const removeItem = (index: number) => {
@@ -112,7 +112,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
         newItems[index] = {
           ...newItems[index],
           productId: value,
-          unitPrice: product.sale_price,
+          unitPrice: String(product.sale_price),
           unitCost: product.cost_price,
         };
       }
@@ -128,9 +128,12 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
     let totalCost = 0;
 
     items.forEach((item) => {
-      const subtotal = item.quantity * item.unitPrice - item.discount;
+      const qty = parseFloat(item.quantity) || 0;
+      const price = parseFloat(item.unitPrice) || 0;
+      const disc = parseFloat(item.discount) || 0;
+      const subtotal = qty * price - disc;
       totalAmount += subtotal;
-      totalCost += item.quantity * item.unitCost;
+      totalCost += qty * item.unitCost;
     });
 
     const tip = parseFloat(tipAmount) || 0;
@@ -144,7 +147,7 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validItems = items.filter((item) => item.productId && item.quantity > 0);
+    const validItems = items.filter((item) => item.productId && (parseFloat(item.quantity) || 0) > 0);
     if (validItems.length === 0) {
       toast.error('Add at least one product');
       return;
@@ -175,15 +178,20 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
       if (saleError) throw saleError;
 
       // Create sale items
-      const saleItems = validItems.map((item) => ({
-        sale_id: sale.id,
-        product_id: item.productId,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        unit_cost: item.unitCost,
-        discount: item.discount,
-        subtotal: item.quantity * item.unitPrice - item.discount,
-      }));
+      const saleItems = validItems.map((item) => {
+        const qty = parseFloat(item.quantity) || 1;
+        const price = parseFloat(item.unitPrice) || 0;
+        const disc = parseFloat(item.discount) || 0;
+        return {
+          sale_id: sale.id,
+          product_id: item.productId,
+          quantity: qty,
+          unit_price: price,
+          unit_cost: item.unitCost,
+          discount: disc,
+          subtotal: qty * price - disc,
+        };
+      });
 
       const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
 
@@ -349,20 +357,20 @@ export function SaleFormDialog({ products, children }: SaleFormDialogProps) {
                   <div className="w-20 space-y-1">
                     <Label className="text-xs">Qty</Label>
                     <Input
-                      type="number"
-                      min="1"
+                      type="text"
+                      inputMode="numeric"
                       value={item.quantity}
-                      onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                      onChange={(e) => updateItem(index, 'quantity', e.target.value.replace(/[^0-9]/g, ''))}
                       disabled={loading}
                     />
                   </div>
                   <div className="w-24 space-y-1">
                     <Label className="text-xs">Price</Label>
                     <Input
-                      type="number"
-                      min="0"
+                      type="text"
+                      inputMode="decimal"
                       value={item.unitPrice}
-                      onChange={(e) => updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      onChange={(e) => updateItem(index, 'unitPrice', e.target.value.replace(/[^0-9.]/g, ''))}
                       disabled={loading}
                     />
                   </div>
