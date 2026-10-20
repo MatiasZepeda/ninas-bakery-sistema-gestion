@@ -227,3 +227,13 @@ BEGIN
             ('00000000-0000-0000-0000-000000000001', 'Other Products', 'product', '#D3D3D3', TRUE);
     END IF;
 END $$;
+
+-- =============================================
+-- GRANTS (Data API access)
+-- =============================================
+-- Supabase stopped auto-granting new public tables on 2026-10-30.
+-- The app uses the anon key with RLS off, so anon needs full CRUD.
+GRANT SELECT, INSERT, UPDATE, DELETE
+    ON public.profiles, public.categories, public.products, public.expenses,
+       public.expense_items, public.sales, public.sale_items
+    TO anon, authenticated, service_role;
